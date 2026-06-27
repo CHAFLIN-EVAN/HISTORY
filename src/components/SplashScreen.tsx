@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(useGSAP);
 
 interface Props {
   onComplete: () => void;
@@ -37,12 +40,16 @@ interface Particle {
 
 export default function SplashScreen({ onComplete }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const pulseRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
   const [stage, setStage] = useState<'build' | 'dissolve' | 'logo'>('build');
   const particlesRef = useRef<Particle[]>([]);
   const frameRef = useRef(0);
   const stageFrameRef = useRef(0);
+  const pulseTweenRef = useRef<gsap.core.Tween | null>(null);
 
   // Canvas particle animation
   useEffect(() => {
@@ -104,7 +111,6 @@ export default function SplashScreen({ onComplete }: Props) {
           p.opacity -= 0.012;
           if (p.opacity < 0) p.opacity = 0;
         }
-
         if (p.opacity <= 0.005) continue;
 
         ctx!.font = `${p.size}px "PingFang SC", "Microsoft YaHei", "SimSun", serif`;
@@ -124,80 +130,112 @@ export default function SplashScreen({ onComplete }: Props) {
       canvas!.height = window.innerHeight;
     }
     window.addEventListener('resize', onResize);
-
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', onResize);
     };
   }, [stage]);
 
-  // GSAP logo entrance
-  useEffect(() => {
-    if (stage !== 'logo' || !logoRef.current || !pulseRef.current) return;
+  // Logo entrance animation
+  useGSAP(() => {
+    if (stage !== 'logo' || !logoRef.current) return;
 
-    const tl = gsap.timeline();
+    const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
 
     tl.fromTo(logoRef.current,
       { autoAlpha: 0, scale: 0.9, filter: 'blur(4px)' },
-      { autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: 1, ease: 'power2.out' }
+      { autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: 1 }
     );
 
-    // Pulse ring animation
-    gsap.to(pulseRef.current, {
-      scale: 1.6,
-      autoAlpha: 0,
-      duration: 2.5,
-      ease: 'power1.out',
-      repeat: -1,
-      repeatDelay: 0.3,
-    });
+    // Stagger inner elements for a refined reveal
+    tl.fromTo(ringRef.current,
+      { autoAlpha: 0, scale: 0.8 },
+      { autoAlpha: 1, scale: 1, duration: 0.6, ease: 'power3.out' },
+      '<0.3'
+    );
+
+    tl.fromTo(textRef.current,
+      { autoAlpha: 0, y: 8 },
+      { autoAlpha: 1, y: 0, duration: 0.5 },
+      '<0.2'
+    );
+
+    // Infinite pulse ring
+    pulseTweenRef.current = gsap.fromTo(pulseRef.current,
+      { autoAlpha: 0.6, scale: 1 },
+      { autoAlpha: 0, scale: 1.6, duration: 2.5, ease: 'none', repeat: -1, repeatDelay: 0.3 }
+    );
+
+    return () => {
+      pulseTweenRef.current?.kill();
+    };
+  }, [stage]);
+
+  // Hover effects — use contextSafe inside a separate useGSAP
+  useGSAP(() => {
+    if (stage !== 'logo' || !ringRef.current || !textRef.current) return;
+
+    const ringEl = ringRef.current;
+    const textEl = textRef.current;
+
+    function onEnter() {
+      gsap.to(ringEl, { borderColor: 'rgba(255,255,255,0.2)', boxShadow: '0 0 120px rgba(255,255,255,0.05)', duration: 0.7 });
+      gsap.to(textEl, { color: 'rgba(255,255,255,0.85)', duration: 0.5 });
+    }
+    function onLeave() {
+      gsap.to(ringEl, { borderColor: 'rgba(255,255,255,0.08)', boxShadow: '0 0 0px rgba(255,255,255,0)', duration: 0.7 });
+      gsap.to(textEl, { color: 'rgba(255,255,255,0.65)', duration: 0.5 });
+    }
+
+    const btn = ringEl.closest('button');
+    btn?.addEventListener('mouseenter', onEnter);
+    btn?.addEventListener('mouseleave', onLeave);
+
+    return () => {
+      btn?.removeEventListener('mouseenter', onEnter);
+      btn?.removeEventListener('mouseleave', onLeave);
+    };
   }, [stage]);
 
   function handleEnter() {
     const tl = gsap.timeline({
+      defaults: { ease: 'power2.inOut' },
       onComplete: () => onComplete(),
     });
 
-    tl.to('.splash-container', {
-      autoAlpha: 0,
-      duration: 0.8,
-      ease: 'power2.inOut',
-    });
+    tl.to(containerRef.current, { autoAlpha: 0, duration: 0.7 });
   }
 
   return (
-    <div
-      className="splash-container fixed inset-0 z-50 bg-black"
-      style={{ willChange: 'opacity' }}
-    >
+    <div ref={containerRef} className="fixed inset-0 z-50 bg-black">
       <canvas ref={canvasRef} className="absolute inset-0" />
 
       {stage === 'logo' && (
         <div ref={logoRef} className="absolute inset-0 flex items-center justify-center z-10">
           <button onClick={handleEnter} className="group relative">
-            <div className="absolute inset-0 rounded-full bg-white/[0.03] blur-3xl scale-150
-                          group-hover:bg-white/[0.08] transition-all duration-700" />
+            {/* Ambient glow behind ring */}
+            <div className="absolute inset-0 rounded-full bg-white/[0.03] blur-3xl scale-150" />
 
-            <div className="relative w-44 h-44 rounded-full border border-white/[0.08]
-                          flex items-center justify-center
-                          group-hover:border-white/[0.20] group-hover:shadow-[0_0_120px_rgba(255,255,255,0.05)]
-                          transition-all duration-700">
-              <div className="text-center">
-                <div className="text-white/[0.65] text-base tracking-[0.5em] font-light
-                              group-hover:text-white/[0.85] transition-colors duration-500">
+            {/* Main ring */}
+            <div
+              ref={ringRef}
+              className="relative w-44 h-44 rounded-full border border-white/[0.08]
+                          flex items-center justify-center"
+            >
+              <div ref={textRef} className="text-center">
+                <div className="text-white/[0.65] text-base tracking-[0.5em] font-light">
                   历史资料库
                 </div>
-                <div className="mt-2 text-white/[0.15] text-sm tracking-[0.3em]
-                              group-hover:text-white/[0.35] transition-colors duration-500">
+                <div className="mt-2 text-white/[0.15] text-sm tracking-[0.3em]">
                   进 入
                 </div>
               </div>
             </div>
 
+            {/* Pulse ring */}
             <div
               ref={pulseRef}
-              className="absolute inset-0 rounded-full border border-white/[0.03] opacity-60"
-              style={{ visibility: 'visible' }}
+              className="absolute inset-0 rounded-full border border-white/[0.03] pointer-events-none"
             />
           </button>
         </div>

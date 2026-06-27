@@ -12,10 +12,11 @@ export default function CustomCursor({ snapEnabled = true }: Props) {
   const yTo = useRef<gsap.QuickToFunc | null>(null);
   const xToFrame = useRef<gsap.QuickToFunc | null>(null);
   const yToFrame = useRef<gsap.QuickToFunc | null>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
-  const dotRef = useRef<HTMLDivElement>(null);
-  const frameRef = useRef<HTMLDivElement>(null);
+  // Wrapper refs — these are positioned by GSAP via left/top, inner elements handle centering via CSS
+  const lineWrapRef = useRef<HTMLDivElement>(null);
+  const glowWrapRef = useRef<HTMLDivElement>(null);
+  const dotWrapRef = useRef<HTMLDivElement>(null);
+  const frameWrapRef = useRef<HTMLDivElement>(null);
 
   const findCardUnderCursor = useCallback((mx: number, my: number) => {
     if (!snapEnabled) return null;
@@ -29,20 +30,19 @@ export default function CustomCursor({ snapEnabled = true }: Props) {
     return null;
   }, [snapEnabled]);
 
-  // Create quickTo tweens — use left/top to avoid conflicting with Tailwind translate classes
   useEffect(() => {
-    const lineEl = lineRef.current!;
-    const glowEl = glowRef.current!;
-    const dotEl = dotRef.current!;
+    const lineEl = lineWrapRef.current!;
+    const glowEl = glowWrapRef.current!;
+    const dotEl = dotWrapRef.current!;
+
+    // Initial position offscreen — GSAP owns left/top, React does NOT set them in JSX
+    gsap.set([lineEl, glowEl, dotEl], { left: -200, top: -200 });
 
     xTo.current = gsap.quickTo([lineEl, glowEl, dotEl], 'left', { duration: 0.15, ease: 'power2.out' });
     yTo.current = gsap.quickTo([lineEl, glowEl, dotEl], 'top', { duration: 0.15, ease: 'power2.out' });
   }, []);
 
   useEffect(() => {
-    // Set initial position offscreen
-    gsap.set([lineRef.current, glowRef.current, dotRef.current], { left: -200, top: -200 });
-
     function onMove(e: MouseEvent) {
       const hit = findCardUnderCursor(e.clientX, e.clientY);
 
@@ -52,11 +52,10 @@ export default function CustomCursor({ snapEnabled = true }: Props) {
         setSnapped(true);
         setSnapRect(hit.rect);
 
-        // Frame follows with quicker snap
-        if (frameRef.current) {
+        if (frameWrapRef.current) {
           if (!xToFrame.current) {
-            xToFrame.current = gsap.quickTo(frameRef.current, 'left', { duration: 0.1, ease: 'power3.out' });
-            yToFrame.current = gsap.quickTo(frameRef.current, 'top', { duration: 0.1, ease: 'power3.out' });
+            xToFrame.current = gsap.quickTo(frameWrapRef.current, 'left', { duration: 0.1, ease: 'power3.out' });
+            yToFrame.current = gsap.quickTo(frameWrapRef.current, 'top', { duration: 0.1, ease: 'power3.out' });
           }
           const xf = xToFrame.current;
           const yf = yToFrame.current;
@@ -82,8 +81,8 @@ export default function CustomCursor({ snapEnabled = true }: Props) {
   return (
     <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 9999 }}>
       <div className={`transition-opacity duration-200 ${snapped ? 'opacity-0' : 'opacity-100'}`}>
-        {/* Crosshair lines container — positioned via left/top, inner lines extend from origin */}
-        <div ref={lineRef} className="absolute" style={{ left: 0, top: 0 }}>
+        {/* Crosshair lines — wrapper positioned by GSAP, inner lines extend from (0,0) */}
+        <div ref={lineWrapRef} className="absolute">
           <div
             className="absolute w-[0.5px] bg-white/25 -translate-x-1/2"
             style={{ top: -LINE_LENGTH, height: LINE_LENGTH * 2 }}
@@ -94,40 +93,36 @@ export default function CustomCursor({ snapEnabled = true }: Props) {
           />
         </div>
 
-        {/* Glow */}
-        <div
-          ref={glowRef}
-          className="absolute w-14 h-14 rounded-full -translate-x-1/2 -translate-y-1/2"
-          style={{ left: 0, top: 0, background: 'radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%)' }}
-        />
+        {/* Glow — wrapper positioned by GSAP, inner div centered via translate */}
+        <div ref={glowWrapRef} className="absolute">
+          <div
+            className="w-14 h-14 rounded-full -translate-x-1/2 -translate-y-1/2"
+            style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%)' }}
+          />
+        </div>
 
-        {/* Center dot */}
-        <div
-          ref={dotRef}
-          className="absolute w-1 h-1 rounded-full bg-white/50 -translate-x-1/2 -translate-y-1/2"
-          style={{ left: 0, top: 0 }}
-        />
+        {/* Center dot — wrapper positioned by GSAP */}
+        <div ref={dotWrapRef} className="absolute">
+          <div className="w-1 h-1 rounded-full bg-white/50 -translate-x-1/2 -translate-y-1/2" />
+        </div>
       </div>
 
-      {/* Snap frame */}
+      {/* Snap frame — wrapper positioned by GSAP, inner centered via translate */}
       {snapped && snapRect && (
-        <div
-          ref={frameRef}
-          className="absolute border border-white/40 rounded-lg"
-          style={{
-            left: 0,
-            top: 0,
-            width: snapRect.width + 12,
-            height: snapRect.height + 12,
-            marginLeft: -(snapRect.width + 12) / 2,
-            marginTop: -(snapRect.height + 12) / 2,
-            boxShadow: '0 0 30px rgba(255,255,255,0.05), inset 0 0 30px rgba(255,255,255,0.02)',
-          }}
-        >
-          <div className="absolute -top-0.5 -left-0.5 w-3 h-3 border-t border-l border-white/55 rounded-tl-sm" />
-          <div className="absolute -top-0.5 -right-0.5 w-3 h-3 border-t border-r border-white/55 rounded-tr-sm" />
-          <div className="absolute -bottom-0.5 -left-0.5 w-3 h-3 border-b border-l border-white/55 rounded-bl-sm" />
-          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 border-b border-r border-white/55 rounded-br-sm" />
+        <div ref={frameWrapRef} className="absolute">
+          <div
+            className="border border-white/40 rounded-lg -translate-x-1/2 -translate-y-1/2 relative"
+            style={{
+              width: snapRect.width + 12,
+              height: snapRect.height + 12,
+              boxShadow: '0 0 30px rgba(255,255,255,0.05), inset 0 0 30px rgba(255,255,255,0.02)',
+            }}
+          >
+            <div className="absolute -top-0.5 left-1 w-3 h-3 border-t border-l border-white/55 rounded-tl-sm" />
+            <div className="absolute -top-0.5 right-1 w-3 h-3 border-t border-r border-white/55 rounded-tr-sm" />
+            <div className="absolute -bottom-0.5 left-1 w-3 h-3 border-b border-l border-white/55 rounded-bl-sm" />
+            <div className="absolute -bottom-0.5 right-1 w-3 h-3 border-b border-r border-white/55 rounded-br-sm" />
+          </div>
         </div>
       )}
     </div>
