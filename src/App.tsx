@@ -14,11 +14,9 @@ import NewsCards from './components/NewsCards';
 /** Collect all displayable nodes from a subtree, tagged with region name */
 function collectNodes(node: DynastyNode, regionName: string): { node: DynastyNode; regionName: string }[] {
   const results: { node: typeof node; regionName: string }[] = [];
-  // Include the node itself if it has content or children
   if (node.content || (node.children && node.children.length > 0)) {
     results.push({ node, regionName });
   }
-  // Recurse into children
   if (node.children) {
     for (const child of node.children) {
       results.push(...collectNodes(child, regionName));
@@ -53,7 +51,6 @@ export default function App() {
     return ids;
   }, [query]);
 
-  // Build unified timeline nodes from all sections
   const allTimelineNodes = useMemo(() => {
     const sections = historyTree.children || [];
     const result: { node: DynastyNode; regionName: string }[] = [];
@@ -78,7 +75,7 @@ export default function App() {
   }
 
   return (
-    <div className="h-full bg-black text-white overflow-hidden">
+    <div className="h-full overflow-hidden" style={{ background: '#F7F5F0', color: '#3D3A35' }}>
       <Starfield />
       <ArchiveParticles />
       <CustomCursor snapEnabled={!selectedNode} />
@@ -88,9 +85,9 @@ export default function App() {
         {/* Top bar */}
         <header className="flex-shrink-0 px-8 py-4 flex items-center justify-between relative z-20">
           <div className="flex items-center gap-3">
-            <h1 className="text-sm font-medium tracking-[0.2em] text-white/60">历史资料库</h1>
-            <span className="text-white/10">·</span>
-            <span className="text-[10px] tracking-widest text-white/25">HISTORY ARCHIVE</span>
+            <h1 className="text-sm font-medium tracking-[0.2em]" style={{ color: '#6B6762' }}>历史资料库</h1>
+            <span style={{ color: '#D4CFC6' }}>·</span>
+            <span className="text-[10px] tracking-widest" style={{ color: '#B8B2A8' }}>HISTORY ARCHIVE</span>
           </div>
 
           {/* Search */}
@@ -100,18 +97,29 @@ export default function App() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="搜索朝代、人物、事件…"
-              className="w-64 h-8 pl-8 pr-3 bg-white/[0.04] hover:bg-white/[0.06] focus:bg-white/[0.08]
-                         rounded-full text-xs text-white/70 placeholder-white/20
-                         outline-none border border-white/[0.06] focus:border-white/[0.12]
-                         transition-all"
+              className="w-64 h-8 pl-8 pr-3 rounded-full text-xs outline-none transition-all"
+              style={{
+                background: 'rgba(0,0,0,0.03)',
+                color: '#5C5852',
+                border: '1px solid rgba(0,0,0,0.06)',
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.background = 'rgba(0,0,0,0.05)';
+                e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.background = 'rgba(0,0,0,0.03)';
+                e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)';
+              }}
             />
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-white/25" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: '#B8B2A8' }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             {query && (
               <button
                 onClick={clearSearch}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/40"
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+                style={{ color: '#C8C3B8' }}
               >
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -132,13 +140,13 @@ export default function App() {
         </section>
 
         {/* News cards section — top (DOM second, always paints above timeline cards) */}
-        <section className="flex-shrink-0 h-[20vh] min-h-[140px] order-1 bg-black/95">
+        <section className="flex-shrink-0 h-[20vh] min-h-[140px] order-1" style={{ background: '#F7F5F0' }}>
           <NewsCards />
         </section>
 
         {/* Footer hint */}
-        <div className="flex-shrink-0 pb-3 text-center order-3 bg-black/95">
-          <p className="text-[10px] tracking-widest text-white/15">
+        <div className="flex-shrink-0 pb-3 text-center order-3" style={{ background: '#F7F5F0' }}>
+          <p className="text-[10px] tracking-widest" style={{ color: '#C8C3B8' }}>
             {query ? `${highlightedIds.size} 个搜索结果` : '滚轮缩放 · 拖拽平移 · 点击卡片探索文明历史'}
           </p>
         </div>

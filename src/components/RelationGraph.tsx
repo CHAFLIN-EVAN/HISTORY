@@ -17,10 +17,8 @@ interface GraphEdge {
   label: string;
 }
 
-/** Extract common Chinese substrings (≥2 chars) between two strings */
 function sharedKeywords(a: string, b: string): string[] {
   const found: string[] = [];
-  // Split by punctuation to get segments
   const segA = a.split(/[，,、\s·。；;：:（）\(\)《》"、]+/).filter(s => s.length >= 2);
   const segB = b.split(/[，,、\s·。；;：:（）\(\)《》"、]+/).filter(s => s.length >= 2);
 
@@ -31,7 +29,6 @@ function sharedKeywords(a: string, b: string): string[] {
       if (sb.length > sa.length && sb.includes(sa)) { found.push(sa); continue; }
     }
   }
-  // Also try sliding window for longer texts
   if (found.length === 0 && a.length > 3 && b.length > 3) {
     for (let w = 4; w >= 2; w--) {
       for (let i = 0; i <= a.length - w; i++) {
@@ -55,24 +52,14 @@ function buildEdges(nodes: GraphNode[], figureCount: number): GraphEdge[] {
     for (let j = i + 1; j < nodes.length; j++) {
       const a = nodes[i].figure;
       const b = nodes[j].figure;
-
-      // Find shared keywords from titles
       const titleShared = sharedKeywords(a.title, b.title);
-      // Find shared keywords from descriptions
       const descShared = sharedKeywords(a.description, b.description);
       const allShared = [...titleShared, ...descShared];
-
-      // Determine if connected
       const sameGroup = i < Math.ceil(figureCount / 3) && j < Math.ceil(figureCount / 3);
-      const hasShared = allShared.length > 0;
-      const connected = hasShared || sameGroup;
-
-      if (connected) {
+      if (allShared.length > 0 || sameGroup) {
         const key = `${Math.min(i, j)}-${Math.max(i, j)}`;
         if (added.has(key)) continue;
         added.add(key);
-
-        // Pick the most meaningful label: prefer title matches, then longest description match
         const label = titleShared[0] || descShared[0] || '';
         edges.push({ from: i, to: j, label });
       }
@@ -124,14 +111,12 @@ export default function RelationGraph({ figures }: Props) {
     });
 
     const edges = buildEdges(nodes, figures.length);
-
     nodesRef.current = nodes;
     edgesRef.current = edges;
     setSelectedIdx(null);
     setPanelFigure(null);
   }, [figures]);
 
-  // Resize canvas
   useEffect(() => {
     const container = containerRef.current;
     const canvas = canvasRef.current;
@@ -153,7 +138,6 @@ export default function RelationGraph({ figures }: Props) {
     return () => ro.disconnect();
   }, [initGraph]);
 
-  // Mouse events
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -161,10 +145,7 @@ export default function RelationGraph({ figures }: Props) {
     function getPos(e: MouseEvent) {
       const rect = canvas!.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
-      return {
-        x: (e.clientX - rect.left) * dpr,
-        y: (e.clientY - rect.top) * dpr,
-      };
+      return { x: (e.clientX - rect.left) * dpr, y: (e.clientY - rect.top) * dpr };
     }
 
     function onDown(e: MouseEvent) {
@@ -180,10 +161,7 @@ export default function RelationGraph({ figures }: Props) {
 
     function onUp(_e: MouseEvent) {
       const drag = dragRef.current;
-      if (drag && !drag.moved) {
-        // It was a click — select the figure
-        selectFigure(drag.node.index);
-      }
+      if (drag && !drag.moved) selectFigure(drag.node.index);
       dragRef.current = null;
     }
 
@@ -202,17 +180,12 @@ export default function RelationGraph({ figures }: Props) {
         drag.node.vy = 0;
       }
 
-      // Update hovered
       const nodes = nodesRef.current;
       let found: number | null = null;
       for (const n of nodes) {
-        if (Math.hypot(n.x - x, n.y - y) < n.radius + 4) {
-          found = n.index;
-          break;
-        }
+        if (Math.hypot(n.x - x, n.y - y) < n.radius + 4) { found = n.index; break; }
       }
-      const prev = hoveredRef.current;
-      if (prev !== found) {
+      if (hoveredRef.current !== found) {
         hoveredRef.current = found;
         if (canvas) canvas.style.cursor = found !== null ? 'pointer' : 'default';
       }
@@ -234,18 +207,14 @@ export default function RelationGraph({ figures }: Props) {
     };
   }, [selectFigure]);
 
-  // Click outside to deselect
   useEffect(() => {
     function onClick(e: MouseEvent) {
-      if (!canvasRef.current?.contains(e.target as Node)) {
-        selectFigure(null);
-      }
+      if (!canvasRef.current?.contains(e.target as Node)) selectFigure(null);
     }
     window.addEventListener('mousedown', onClick);
     return () => window.removeEventListener('mousedown', onClick);
   }, [selectFigure]);
 
-  // Animation loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -262,17 +231,13 @@ export default function RelationGraph({ figures }: Props) {
       const th = fontSize * dpr * 1.4;
       const px = x - tw / 2;
       const py = y - th / 2;
-
-      // Pill background
       const padX = 5 * dpr;
       const padY = 2 * dpr;
       ctx!.beginPath();
       ctx!.roundRect(px - padX, py - padY, tw + padX * 2, th + padY * 2, 6 * dpr);
-      ctx!.fillStyle = active ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.04)';
+      ctx!.fillStyle = active ? 'rgba(0,0,0,0.08)' : 'rgba(0,0,0,0.03)';
       ctx!.fill();
-
-      // Text
-      ctx!.fillStyle = active ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)';
+      ctx!.fillStyle = active ? 'rgba(0,0,0,0.55)' : 'rgba(0,0,0,0.2)';
       ctx!.textAlign = 'left';
       ctx!.textBaseline = 'top';
       ctx!.fillText(text, px, py);
@@ -295,13 +260,10 @@ export default function RelationGraph({ figures }: Props) {
       const W = w / dpr;
       const H = h / dpr;
 
-      // Forces
       for (const n of nodes) {
         if (dragRef.current?.node === n) continue;
-
         n.vx += (cx / dpr - n.x / dpr) * 0.0004;
         n.vy += (cy / dpr - n.y / dpr) * 0.0004;
-
         const dx = n.x / dpr - mx / dpr;
         const dy = n.y / dpr - my / dpr;
         const dist = Math.hypot(dx, dy);
@@ -310,7 +272,6 @@ export default function RelationGraph({ figures }: Props) {
           n.vx += (dx / dist) * force;
           n.vy += (dy / dist) * force;
         }
-
         for (const other of nodes) {
           if (other === n) continue;
           const dx2 = (n.x - other.x) / dpr;
@@ -323,19 +284,15 @@ export default function RelationGraph({ figures }: Props) {
             n.vy += (dy2 / d2) * f;
           }
         }
-
-        n.vx *= 0.9;
-        n.vy *= 0.9;
+        n.vx *= 0.9; n.vy *= 0.9;
         n.x += n.vx * dpr;
         n.y += n.vy * dpr;
-
         if (n.x < n.radius) { n.x = n.radius; n.vx *= -0.5; }
         if (n.x > w - n.radius) { n.x = w - n.radius; n.vx *= -0.5; }
         if (n.y < n.radius) { n.y = n.radius; n.vy *= -0.5; }
         if (n.y > h - n.radius) { n.y = h - n.radius; n.vy *= -0.5; }
       }
 
-      // Edge forces
       for (const e of edges) {
         const a = nodes[e.from];
         const b = nodes[e.to];
@@ -346,14 +303,11 @@ export default function RelationGraph({ figures }: Props) {
           const force = (dist - 70) * 0.0012;
           const fx = (dx / dist) * force;
           const fy = (dy / dist) * force;
-          a.vx -= fx * dpr;
-          a.vy -= fy * dpr;
-          b.vx += fx * dpr;
-          b.vy += fy * dpr;
+          a.vx -= fx * dpr; a.vy -= fy * dpr;
+          b.vx += fx * dpr; b.vy += fy * dpr;
         }
       }
 
-      // Build connected node set
       const connectedSet = new Set<number>();
       if (selIdx !== null) {
         connectedSet.add(selIdx);
@@ -363,10 +317,8 @@ export default function RelationGraph({ figures }: Props) {
         }
       }
 
-      // Draw
       ctx!.clearRect(0, 0, W, H);
 
-      // Edges
       for (const e of edges) {
         const a = nodes[e.from];
         const b = nodes[e.to];
@@ -374,20 +326,16 @@ export default function RelationGraph({ figures }: Props) {
         const ay = a.y / dpr;
         const bx = b.x / dpr;
         const by = b.y / dpr;
-
-        const isConnected = selIdx !== null &&
-          (e.from === selIdx || e.to === selIdx);
-        const isActive = isConnected ||
-          (selIdx === null && (a.index === hovIdx || b.index === hovIdx));
+        const isConnected = selIdx !== null && (e.from === selIdx || e.to === selIdx);
+        const isActive = isConnected || (selIdx === null && (a.index === hovIdx || b.index === hovIdx));
 
         ctx!.beginPath();
         ctx!.moveTo(ax, ay);
         ctx!.lineTo(bx, by);
-        ctx!.strokeStyle = isActive ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.06)';
-        ctx!.lineWidth = isActive ? (isConnected ? 2 : 1.2) : 0.5;
+        ctx!.strokeStyle = isActive ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.05)';
+        ctx!.lineWidth = isActive ? (isConnected ? 2 : 1) : 0.5;
         ctx!.stroke();
 
-        // Label at midpoint
         if (e.label) {
           const mx2 = (ax + bx) / 2;
           const my2 = (ay + by) / 2;
@@ -395,7 +343,6 @@ export default function RelationGraph({ figures }: Props) {
         }
       }
 
-      // Nodes
       for (const n of nodes) {
         const nx = n.x / dpr;
         const ny = n.y / dpr;
@@ -404,67 +351,54 @@ export default function RelationGraph({ figures }: Props) {
         const isSelected = n.index === selIdx;
         const isConnectedToSelected = connectedSet.has(n.index) && n.index !== selIdx;
 
-        // Outer glow for selected
         if (isSelected) {
           const glow = ctx!.createRadialGradient(nx, ny, r * 0.5, nx, ny, r * 3);
-          glow.addColorStop(0, 'rgba(251,191,36,0.35)');
-          glow.addColorStop(0.5, 'rgba(251,191,36,0.1)');
-          glow.addColorStop(1, 'rgba(251,191,36,0)');
-          ctx!.beginPath();
-          ctx!.arc(nx, ny, r * 3, 0, Math.PI * 2);
-          ctx!.fillStyle = glow;
-          ctx!.fill();
+          glow.addColorStop(0, 'rgba(184,148,78,0.3)');
+          glow.addColorStop(0.5, 'rgba(184,148,78,0.08)');
+          glow.addColorStop(1, 'rgba(184,148,78,0)');
+          ctx!.beginPath(); ctx!.arc(nx, ny, r * 3, 0, Math.PI * 2);
+          ctx!.fillStyle = glow; ctx!.fill();
         } else if (isConnectedToSelected) {
           const glow = ctx!.createRadialGradient(nx, ny, r * 0.5, nx, ny, r * 2.2);
-          glow.addColorStop(0, 'rgba(255,255,255,0.15)');
-          glow.addColorStop(1, 'rgba(255,255,255,0)');
-          ctx!.beginPath();
-          ctx!.arc(nx, ny, r * 2.2, 0, Math.PI * 2);
-          ctx!.fillStyle = glow;
-          ctx!.fill();
+          glow.addColorStop(0, 'rgba(0,0,0,0.08)');
+          glow.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx!.beginPath(); ctx!.arc(nx, ny, r * 2.2, 0, Math.PI * 2);
+          ctx!.fillStyle = glow; ctx!.fill();
         } else if (isHovered) {
           const glow = ctx!.createRadialGradient(nx, ny, r * 0.3, nx, ny, r * 2.2);
-          glow.addColorStop(0, 'rgba(255,255,255,0.12)');
-          glow.addColorStop(1, 'rgba(255,255,255,0)');
-          ctx!.beginPath();
-          ctx!.arc(nx, ny, r * 2.2, 0, Math.PI * 2);
-          ctx!.fillStyle = glow;
-          ctx!.fill();
+          glow.addColorStop(0, 'rgba(0,0,0,0.06)');
+          glow.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx!.beginPath(); ctx!.arc(nx, ny, r * 2.2, 0, Math.PI * 2);
+          ctx!.fillStyle = glow; ctx!.fill();
         }
 
-        // Node circle
-        ctx!.beginPath();
-        ctx!.arc(nx, ny, r, 0, Math.PI * 2);
-        ctx!.fillStyle = isSelected ? 'rgba(251,191,36,0.25)'
-          : isConnectedToSelected ? 'rgba(255,255,255,0.12)'
-          : isHovered ? 'rgba(255,255,255,0.14)'
-          : 'rgba(255,255,255,0.06)';
+        ctx!.beginPath(); ctx!.arc(nx, ny, r, 0, Math.PI * 2);
+        ctx!.fillStyle = isSelected ? 'rgba(184,148,78,0.2)'
+          : isConnectedToSelected ? 'rgba(0,0,0,0.06)'
+          : isHovered ? 'rgba(0,0,0,0.06)'
+          : 'rgba(0,0,0,0.03)';
         ctx!.fill();
 
-        // Node border
-        ctx!.strokeStyle = isSelected ? 'rgba(251,191,36,0.7)'
-          : isConnectedToSelected ? 'rgba(255,255,255,0.4)'
-          : isHovered ? 'rgba(255,255,255,0.45)'
-          : 'rgba(255,255,255,0.15)';
+        ctx!.strokeStyle = isSelected ? 'rgba(184,148,78,0.6)'
+          : isConnectedToSelected ? 'rgba(0,0,0,0.25)'
+          : isHovered ? 'rgba(0,0,0,0.3)'
+          : 'rgba(0,0,0,0.1)';
         ctx!.lineWidth = isSelected ? 2 : isConnectedToSelected ? 1.2 : isHovered ? 1 : 0.5;
         ctx!.stroke();
 
-        // Name
         const fontSize = isSelected ? 11 : isHovered || isConnectedToSelected ? 10 : 9;
         ctx!.font = `${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
-        ctx!.fillStyle = isSelected ? 'rgba(251,191,36,0.95)'
-          : isConnectedToSelected ? 'rgba(255,255,255,0.85)'
-          : isHovered ? 'rgba(255,255,255,0.9)'
-          : 'rgba(255,255,255,0.6)';
+        ctx!.fillStyle = isSelected ? 'rgba(184,148,78,0.9)'
+          : isConnectedToSelected ? 'rgba(0,0,0,0.7)'
+          : isHovered ? 'rgba(0,0,0,0.75)'
+          : 'rgba(0,0,0,0.5)';
         ctx!.textAlign = 'center';
         ctx!.textBaseline = 'middle';
         ctx!.fillText(n.figure.name, nx, ny);
 
-        // Title below
         if (isHovered || isSelected || isConnectedToSelected) {
           ctx!.font = `${isSelected ? 9 : 8}px "PingFang SC", "Microsoft YaHei", sans-serif`;
-          ctx!.fillStyle = isSelected ? 'rgba(251,191,36,0.6)'
-            : 'rgba(255,255,255,0.4)';
+          ctx!.fillStyle = isSelected ? 'rgba(184,148,78,0.5)' : 'rgba(0,0,0,0.3)';
           ctx!.fillText(n.figure.title, nx, ny + r + 10);
         }
       }
@@ -479,43 +413,40 @@ export default function RelationGraph({ figures }: Props) {
 
   return (
     <div className="w-full">
-      {/* Graph canvas */}
       <div
         ref={containerRef}
-        className="w-full h-[380px] rounded-xl border border-white/[0.06] overflow-hidden bg-white/[0.02] relative"
+        className="w-full h-[380px] rounded-xl border overflow-hidden relative"
+        style={{ background: '#FCFBF8', borderColor: 'rgba(0,0,0,0.06)' }}
       >
         <canvas ref={canvasRef} className="w-full h-full block" />
-
-        {/* Deselect hint */}
         {selectedIdx !== null && (
           <button
             onClick={() => selectFigure(null)}
-            className="absolute top-2 right-2 text-[10px] text-white/25 hover:text-white/50 bg-white/[0.04] hover:bg-white/[0.08] px-2 py-0.5 rounded-full transition-colors"
+            className="absolute top-2 right-2 text-[10px] px-2 py-0.5 rounded-full transition-colors"
+            style={{ color: '#8A8680', background: 'rgba(0,0,0,0.03)' }}
           >
             取消选中
           </button>
         )}
       </div>
 
-      {/* Detail panel */}
       {panelFigure && (
-        <div className="mt-4 p-5 rounded-xl bg-white/[0.04] border border-amber-500/20 backdrop-blur-sm">
+        <div className="mt-4 p-5 rounded-xl border backdrop-blur-sm" style={{ background: '#FCFBF8', borderColor: 'rgba(184,148,78,0.25)' }}>
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-2 h-2 rounded-full bg-amber-400/70" />
-            <h4 className="text-sm font-medium text-amber-200/90">{panelFigure.name}</h4>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300/60 border border-amber-500/15">
+            <div className="w-2 h-2 rounded-full" style={{ background: 'rgba(184,148,78,0.5)' }} />
+            <h4 className="text-sm font-medium" style={{ color: '#8B6F3E' }}>{panelFigure.name}</h4>
+            <span className="text-[10px] px-2 py-0.5 rounded-full border" style={{ color: '#8B6F3E', background: 'rgba(184,148,78,0.06)', borderColor: 'rgba(184,148,78,0.12)' }}>
               {panelFigure.title}
             </span>
           </div>
-          <p className="text-xs leading-relaxed text-white/55">{panelFigure.description}</p>
+          <p className="text-xs leading-relaxed" style={{ color: '#6B6762' }}>{panelFigure.description}</p>
 
-          {/* Show relationships */}
           {selectedIdx !== null && (() => {
             const relatedEdges = edgesRef.current.filter(e => e.from === selectedIdx || e.to === selectedIdx);
             if (relatedEdges.length === 0) return null;
             return (
-              <div className="mt-3 pt-3 border-t border-white/[0.05]">
-                <span className="text-[10px] text-white/25">关联人物：</span>
+              <div className="mt-3 pt-3 border-t" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
+                <span className="text-[10px]" style={{ color: '#B8B2A8' }}>关联人物：</span>
                 <div className="flex gap-1.5 flex-wrap mt-1.5">
                   {relatedEdges.map((e, i) => {
                     const otherIdx = e.from === selectedIdx ? e.to : e.from;
@@ -525,12 +456,11 @@ export default function RelationGraph({ figures }: Props) {
                       <button
                         key={i}
                         onClick={() => selectFigure(otherIdx)}
-                        className={`text-[10px] px-2 py-1 rounded-md transition-all ${
-                          'bg-white/[0.04] text-white/50 hover:bg-white/[0.1] hover:text-white/80 border border-white/[0.06]'
-                        }`}
+                        className="text-[10px] px-2 py-1 rounded-md transition-all"
+                        style={{ color: '#5C5852', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)' }}
                       >
                         {other.figure.name}
-                        {e.label && <span className="text-white/18 ml-1">· {e.label}</span>}
+                        {e.label && <span style={{ color: '#C8C3B8' }} className="ml-1">· {e.label}</span>}
                       </button>
                     );
                   })}

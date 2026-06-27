@@ -51,7 +51,6 @@ export default function SplashScreen({ onComplete }: Props) {
   const stageFrameRef = useRef(0);
   const pulseTweenRef = useRef<gsap.core.Tween | null>(null);
 
-  // Canvas particle animation
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -71,7 +70,7 @@ export default function SplashScreen({ onComplete }: Props) {
         y: Math.random() * cvs.height,
         text: TERMS[Math.floor(Math.random() * TERMS.length)],
         opacity: 0,
-        targetOpacity: 0.12 + Math.random() * 0.55,
+        targetOpacity: 0.1 + Math.random() * 0.45,
         size: 9 + Math.random() * 20,
         fadeSpeed: 0.004 + Math.random() * 0.012,
       };
@@ -81,7 +80,7 @@ export default function SplashScreen({ onComplete }: Props) {
       frameRef.current++;
       const cvs = canvas!;
 
-      ctx!.fillStyle = 'rgba(0,0,0,0.06)';
+      ctx!.fillStyle = 'rgba(247,245,240,0.08)';
       ctx!.fillRect(0, 0, cvs.width, cvs.height);
 
       const ps = particlesRef.current;
@@ -114,7 +113,7 @@ export default function SplashScreen({ onComplete }: Props) {
         if (p.opacity <= 0.005) continue;
 
         ctx!.font = `${p.size}px "PingFang SC", "Microsoft YaHei", "SimSun", serif`;
-        ctx!.fillStyle = `rgba(255,255,255,${p.opacity})`;
+        ctx!.fillStyle = `rgba(60,50,40,${p.opacity})`;
         ctx!.textAlign = 'center';
         ctx!.textBaseline = 'middle';
         ctx!.fillText(p.text, p.x, p.y);
@@ -136,7 +135,6 @@ export default function SplashScreen({ onComplete }: Props) {
     };
   }, [stage]);
 
-  // Logo entrance animation
   useGSAP(() => {
     if (stage !== 'logo' || !logoRef.current) return;
 
@@ -147,7 +145,6 @@ export default function SplashScreen({ onComplete }: Props) {
       { autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: 1 }
     );
 
-    // Stagger inner elements for a refined reveal
     tl.fromTo(ringRef.current,
       { autoAlpha: 0, scale: 0.8 },
       { autoAlpha: 1, scale: 1, duration: 0.6, ease: 'power3.out' },
@@ -160,9 +157,8 @@ export default function SplashScreen({ onComplete }: Props) {
       '<0.2'
     );
 
-    // Infinite pulse ring
     pulseTweenRef.current = gsap.fromTo(pulseRef.current,
-      { autoAlpha: 0.6, scale: 1 },
+      { autoAlpha: 0.5, scale: 1 },
       { autoAlpha: 0, scale: 1.6, duration: 2.5, ease: 'none', repeat: -1, repeatDelay: 0.3 }
     );
 
@@ -171,7 +167,6 @@ export default function SplashScreen({ onComplete }: Props) {
     };
   }, [stage]);
 
-  // Hover effects — use contextSafe inside a separate useGSAP
   useGSAP(() => {
     if (stage !== 'logo' || !ringRef.current || !textRef.current) return;
 
@@ -179,12 +174,12 @@ export default function SplashScreen({ onComplete }: Props) {
     const textEl = textRef.current;
 
     function onEnter() {
-      gsap.to(ringEl, { borderColor: 'rgba(255,255,255,0.2)', boxShadow: '0 0 120px rgba(255,255,255,0.05)', duration: 0.7 });
-      gsap.to(textEl, { color: 'rgba(255,255,255,0.85)', duration: 0.5 });
+      gsap.to(ringEl, { borderColor: 'rgba(60,50,40,0.2)', boxShadow: '0 0 120px rgba(60,50,40,0.06)', duration: 0.7 });
+      gsap.to(textEl, { color: 'rgba(60,50,40,0.8)', duration: 0.5 });
     }
     function onLeave() {
-      gsap.to(ringEl, { borderColor: 'rgba(255,255,255,0.08)', boxShadow: '0 0 0px rgba(255,255,255,0)', duration: 0.7 });
-      gsap.to(textEl, { color: 'rgba(255,255,255,0.65)', duration: 0.5 });
+      gsap.to(ringEl, { borderColor: 'rgba(60,50,40,0.08)', boxShadow: '0 0 0px rgba(60,50,40,0)', duration: 0.7 });
+      gsap.to(textEl, { color: 'rgba(60,50,40,0.55)', duration: 0.5 });
     }
 
     const btn = ringEl.closest('button');
@@ -207,35 +202,33 @@ export default function SplashScreen({ onComplete }: Props) {
   }
 
   return (
-    <div ref={containerRef} className="fixed inset-0 z-50 bg-black">
+    <div ref={containerRef} className="fixed inset-0 z-50" style={{ background: '#F7F5F0' }}>
       <canvas ref={canvasRef} className="absolute inset-0" />
 
       {stage === 'logo' && (
         <div ref={logoRef} className="absolute inset-0 flex items-center justify-center z-10">
           <button onClick={handleEnter} className="group relative">
-            {/* Ambient glow behind ring */}
-            <div className="absolute inset-0 rounded-full bg-white/[0.03] blur-3xl scale-150" />
+            <div className="absolute inset-0 rounded-full blur-3xl scale-150" style={{ background: 'rgba(60,50,40,0.02)' }} />
 
-            {/* Main ring */}
             <div
               ref={ringRef}
-              className="relative w-44 h-44 rounded-full border border-white/[0.08]
-                          flex items-center justify-center"
+              className="relative w-44 h-44 rounded-full border flex items-center justify-center"
+              style={{ borderColor: 'rgba(60,50,40,0.08)' }}
             >
-              <div ref={textRef} className="text-center">
-                <div className="text-white/[0.65] text-base tracking-[0.5em] font-light">
+              <div ref={textRef} className="text-center" style={{ color: 'rgba(60,50,40,0.55)' }}>
+                <div className="text-base tracking-[0.5em] font-light">
                   历史资料库
                 </div>
-                <div className="mt-2 text-white/[0.15] text-sm tracking-[0.3em]">
+                <div className="mt-2 text-sm tracking-[0.3em]" style={{ color: 'rgba(60,50,40,0.2)' }}>
                   进 入
                 </div>
               </div>
             </div>
 
-            {/* Pulse ring */}
             <div
               ref={pulseRef}
-              className="absolute inset-0 rounded-full border border-white/[0.03] pointer-events-none"
+              className="absolute inset-0 rounded-full border pointer-events-none"
+              style={{ borderColor: 'rgba(60,50,40,0.03)' }}
             />
           </button>
         </div>

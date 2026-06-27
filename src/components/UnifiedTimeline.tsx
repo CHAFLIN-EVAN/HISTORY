@@ -148,23 +148,25 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
       <div className="absolute top-3 right-4 z-20 flex items-center gap-1.5">
         <button
           onClick={() => setScale((s) => Math.min(MAX_SCALE, s + 0.15))}
-          className="w-6 h-6 flex items-center justify-center rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-white/50 hover:text-white/80 text-xs transition-colors"
+          className="w-6 h-6 flex items-center justify-center rounded-full text-xs transition-colors"
+          style={{ background: 'rgba(0,0,0,0.04)', color: '#8A8680' }}
         >
           +
         </button>
         <button
           onClick={() => setScale((s) => Math.max(MIN_SCALE, s - 0.15))}
-          className="w-6 h-6 flex items-center justify-center rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-white/50 hover:text-white/80 text-xs transition-colors"
+          className="w-6 h-6 flex items-center justify-center rounded-full text-xs transition-colors"
+          style={{ background: 'rgba(0,0,0,0.04)', color: '#8A8680' }}
         >
           −
         </button>
-        <span className="text-[10px] text-white/25 ml-1 w-9 text-center">{Math.round(scale * 100)}%</span>
+        <span className="text-[10px] ml-1 w-9 text-center" style={{ color: '#C8C3B8' }}>{Math.round(scale * 100)}%</span>
       </div>
 
-      {/* Fixed central axis — always full width */}
+      {/* Fixed central axis */}
       <div
         className="absolute left-0 right-0 z-10 pointer-events-none"
-        style={{ top: '50%', height: 1, background: 'rgba(255,255,255,0.18)' }}
+        style={{ top: '50%', height: 1, background: 'rgba(0,0,0,0.08)' }}
       />
 
       {/* Scrollable layer — overflow:clip with margin prevents card clipping */}
@@ -211,7 +213,7 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
                     position: 'absolute',
                     left: '50%',
                     width: 1,
-                    background: 'rgba(255,255,255,0.14)',
+                    background: 'rgba(0,0,0,0.08)',
                     ...(isAbove
                       ? { top: CARD_H, height: topFromCenter }
                       : { bottom: CARD_H, height: topFromCenter }),
@@ -227,19 +229,19 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
                     height: 6,
                     borderRadius: '50%',
                     background: selectedId === node.id
-                      ? 'rgba(255,255,255,0.8)'
-                      : 'rgba(255,255,255,0.4)',
+                      ? 'rgba(0,0,0,0.5)'
+                      : 'rgba(0,0,0,0.2)',
                     ...(isAbove
                       ? { top: CARD_H + topFromCenter - 3 }
                       : { bottom: CARD_H + topFromCenter - 3 }),
                   }}
                 />
 
-                {/* Year label on axis — placed opposite of card */}
+                {/* Year label */}
                 <span
                   className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] tracking-wider"
                   style={{
-                    color: 'rgba(255,255,255,0.35)',
+                    color: '#C8C3B8',
                     ...(isAbove
                       ? { top: CARD_H + topFromCenter + 8 }
                       : { bottom: CARD_H + topFromCenter + 8 }),

@@ -50,7 +50,6 @@ export default function CustomCursor({ snapEnabled = true }: Props) {
             setSnapped(true);
           }
         }
-        // Direct DOM update for smooth snap-frame following
         const snapEl = snapRef.current;
         if (snapEl) {
           const w = hitRect.width + 12;
@@ -93,24 +92,24 @@ export default function CustomCursor({ snapEnabled = true }: Props) {
 
   return (
     <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 9999 }}>
-      {/* Crosshair layer — hidden when snapped */}
+      {/* Crosshair layer */}
       <div ref={cursorRef} className="absolute" style={{ left: 0, top: 0 }}>
         <div className={`transition-opacity duration-150 ${snapped ? 'opacity-0' : 'opacity-100'}`}>
           {/* Vertical line */}
-          <div className="absolute w-[0.5px] bg-white/25" style={{ left: -0.25, top: -LINE, height: LINE * 2 }} />
+          <div className="absolute w-[0.5px]" style={{ left: -0.25, top: -LINE, height: LINE * 2, background: 'rgba(60,50,40,0.2)' }} />
           {/* Horizontal line */}
-          <div className="absolute h-[0.5px] bg-white/25" style={{ top: -0.25, left: -LINE, width: LINE * 2 }} />
+          <div className="absolute h-[0.5px]" style={{ top: -0.25, left: -LINE, width: LINE * 2, background: 'rgba(60,50,40,0.2)' }} />
           {/* Glow */}
           <div
             className="absolute w-14 h-14 rounded-full -translate-x-1/2 -translate-y-1/2"
-            style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%)' }}
+            style={{ background: 'radial-gradient(circle, rgba(60,50,40,0.06) 0%, transparent 70%)' }}
           />
           {/* Center dot */}
-          <div className="absolute w-1 h-1 rounded-full bg-white/50 -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute w-1 h-1 rounded-full -translate-x-1/2 -translate-y-1/2" style={{ background: 'rgba(60,50,40,0.45)' }} />
         </div>
       </div>
 
-      {/* Snap frame — positioned via snapRect for immediate correct placement */}
+      {/* Snap frame */}
       {snapped && snapRect && (
         <div
           ref={snapRef}
@@ -122,17 +121,18 @@ export default function CustomCursor({ snapEnabled = true }: Props) {
           }}
         >
           <div
-            className="border border-white/40 rounded-lg relative"
+            className="border rounded-lg relative"
             style={{
               width: snapRect.width + 12,
               height: snapRect.height + 12,
-              boxShadow: '0 0 30px rgba(255,255,255,0.05), inset 0 0 30px rgba(255,255,255,0.02)',
+              borderColor: 'rgba(60,50,40,0.3)',
+              boxShadow: '0 0 30px rgba(60,50,40,0.05), inset 0 0 30px rgba(60,50,40,0.02)',
             }}
           >
-            <div className="absolute -top-0.5 left-1 w-3 h-3 border-t border-l border-white/55 rounded-tl-sm" />
-            <div className="absolute -top-0.5 right-1 w-3 h-3 border-t border-r border-white/55 rounded-tr-sm" />
-            <div className="absolute -bottom-0.5 left-1 w-3 h-3 border-b border-l border-white/55 rounded-bl-sm" />
-            <div className="absolute -bottom-0.5 right-1 w-3 h-3 border-b border-r border-white/55 rounded-br-sm" />
+            <div className="absolute -top-0.5 left-1 w-3 h-3 border-t border-l rounded-tl-sm" style={{ borderColor: 'rgba(60,50,40,0.4)' }} />
+            <div className="absolute -top-0.5 right-1 w-3 h-3 border-t border-r rounded-tr-sm" style={{ borderColor: 'rgba(60,50,40,0.4)' }} />
+            <div className="absolute -bottom-0.5 left-1 w-3 h-3 border-b border-l rounded-bl-sm" style={{ borderColor: 'rgba(60,50,40,0.4)' }} />
+            <div className="absolute -bottom-0.5 right-1 w-3 h-3 border-b border-r rounded-br-sm" style={{ borderColor: 'rgba(60,50,40,0.4)' }} />
           </div>
         </div>
       )}

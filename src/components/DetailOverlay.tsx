@@ -19,7 +19,6 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
   const exitingRef = useRef(false);
 
-  // Entrance animation
   useGSAP(() => {
     if (exitingRef.current) return;
 
@@ -36,7 +35,6 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
       '<0.05'
     );
 
-    // Escape key
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') handleClose();
     }
@@ -73,35 +71,41 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
       {/* Backdrop */}
       <div
         ref={backdropRef}
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-        style={{ visibility: 'hidden' }}
+        className="fixed inset-0 z-40"
+        style={{ visibility: 'hidden', background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}
         onClick={handleClose}
       />
 
       {/* Panel */}
       <div
         ref={panelRef}
-        className="fixed z-50 transition-colors
+        className="fixed z-50
           inset-8 sm:inset-12 md:inset-16 lg:inset-x-24 lg:inset-y-16
-          rounded-3xl border border-white/[0.10]
-          bg-zinc-900/75 backdrop-blur-2xl
-          shadow-2xl shadow-black/40
+          rounded-3xl border
+          shadow-2xl
           flex flex-col overflow-hidden"
-        style={{ visibility: 'hidden' }}
+        style={{
+          visibility: 'hidden',
+          background: 'rgba(255,255,255,0.92)',
+          backdropFilter: 'blur(20px)',
+          borderColor: 'rgba(0,0,0,0.08)',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.12)',
+        }}
       >
         {/* Header bar */}
-        <div className="flex-shrink-0 flex items-center justify-between px-8 py-5 border-b border-white/[0.06]">
+        <div className="flex-shrink-0 flex items-center justify-between px-8 py-5 border-b" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
           <div className="flex items-center gap-3 min-w-0">
-            <h2 className="text-base font-semibold text-white/90 tracking-wide truncate">{node.name}</h2>
+            <h2 className="text-base font-semibold tracking-wide truncate" style={{ color: '#3D3A35' }}>{node.name}</h2>
             {node.period && (
-              <span className="text-[11px] tracking-wider text-white/30 bg-white/[0.05] px-2.5 py-0.5 rounded-full flex-shrink-0">
+              <span className="text-[11px] tracking-wider px-2.5 py-0.5 rounded-full flex-shrink-0" style={{ color: '#8A8680', background: 'rgba(0,0,0,0.04)' }}>
                 {node.period}
               </span>
             )}
           </div>
           <button
             onClick={handleClose}
-            className="flex-shrink-0 p-2 text-white/25 hover:text-white/60 transition-colors rounded-lg hover:bg-white/[0.05]"
+            className="flex-shrink-0 p-2 transition-colors rounded-lg"
+            style={{ color: '#B8B2A8' }}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
@@ -119,8 +123,8 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
                     key={ch.id}
                     data-snap
                     onClick={() => onNavigate(ch.id)}
-                    className="px-3 py-1.5 rounded-lg text-xs text-white/70 bg-white/[0.06] border border-white/[0.10]
-                             hover:bg-white/[0.12] hover:text-white/90 transition-all"
+                    className="px-3 py-1.5 rounded-lg text-xs transition-all"
+                    style={{ color: '#5C5852', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)' }}
                   >
                     {ch.name}
                   </button>
@@ -130,7 +134,7 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
 
             {hasContent && (
               <>
-                <div className="flex gap-5 mb-5 border-b border-white/[0.06]">
+                <div className="flex gap-5 mb-5 border-b" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
                   {(['overview', 'timeline', 'figures', 'culture'] as const).map((t) => {
                     const labels = { overview: '概述', timeline: '时间线', figures: '人物', culture: '文化' };
                     const empty = (t === 'timeline' && !hasTimeline) ||
@@ -142,27 +146,30 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
                         key={t}
                         onClick={() => setTab(t)}
                         className={`pb-2.5 text-xs transition-colors relative ${
-                          tab === t ? 'text-white font-medium' : 'text-white/30 hover:text-white/50'
+                          tab === t ? 'font-medium' : ''
                         }`}
+                        style={{ color: tab === t ? '#3D3A35' : '#B8B2A8' }}
                       >
                         {labels[t]}
-                        {tab === t && <span className="absolute bottom-0 left-0 right-0 h-[1px] bg-white/40" />}
+                        {tab === t && (
+                          <span className="absolute bottom-0 left-0 right-0" style={{ height: 1, background: 'rgba(0,0,0,0.2)' }} />
+                        )}
                       </button>
                     );
                   })}
                 </div>
 
                 {tab === 'overview' && (
-                  <p className="text-sm leading-relaxed text-white/65">{c.overview}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: '#6B6762' }}>{c.overview}</p>
                 )}
                 {tab === 'timeline' && hasTimeline && (
-                  <TimelineView events={c.timeline} dark />
+                  <TimelineView events={c.timeline} dark={false} />
                 )}
                 {tab === 'figures' && hasFigures && (
                   <RelationGraph figures={c.figures} />
                 )}
                 {tab === 'culture' && hasCulture && (
-                  <p className="text-sm leading-relaxed text-white/65">{c.culture}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: '#6B6762' }}>{c.culture}</p>
                 )}
               </>
             )}

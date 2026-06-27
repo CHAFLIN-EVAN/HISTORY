@@ -41,13 +41,13 @@ export default function ArchiveParticles() {
         particles.push({
           x: Math.random() * canvas!.width,
           y: Math.random() * canvas!.height,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: -0.1 - Math.random() * 0.4,
-          size: 0.6 + Math.random() * 2.2,
+          vx: (Math.random() - 0.5) * 0.25,
+          vy: -0.08 - Math.random() * 0.35,
+          size: 0.5 + Math.random() * 1.8,
           opacity: 0,
           life: 0,
-          maxLife: 200 + Math.random() * 400,
-          hue: 30 + Math.random() * 25,
+          maxLife: 180 + Math.random() * 350,
+          hue: 25 + Math.random() * 20,
         });
       }
     }
@@ -60,58 +60,45 @@ export default function ArchiveParticles() {
 
       ctx!.clearRect(0, 0, w, h);
 
-      // Maintain ~55 particles
-      if (particles.length < 55) spawn(3);
+      if (particles.length < 45) spawn(3);
 
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
 
-        // Mouse avoidance
         const dx = p.x - mx;
         const dy = p.y - my;
         const dist = Math.hypot(dx, dy);
         if (dist < 120 && dist > 0) {
-          const force = (1 - dist / 120) * 0.4;
+          const force = (1 - dist / 120) * 0.35;
           p.vx += (dx / dist) * force;
           p.vy += (dy / dist) * force;
         }
 
-        // Damping
         p.vx *= 0.995;
         p.vy *= 0.995;
-
         p.x += p.vx;
         p.y += p.vy;
 
-        // Lifecycle
         p.life++;
-        if (p.life < 40) {
-          p.opacity = p.life / 40 * 0.5;
-        } else if (p.life > p.maxLife - 40) {
-          p.opacity = (p.maxLife - p.life) / 40 * 0.5;
+        if (p.life < 35) {
+          p.opacity = p.life / 35 * 0.35;
+        } else if (p.life > p.maxLife - 35) {
+          p.opacity = (p.maxLife - p.life) / 35 * 0.35;
         }
 
-        // Wrap around edges
         if (p.x < -20) p.x = w + 20;
         if (p.x > w + 20) p.x = -20;
         if (p.y < -20) { p.y = h + 20; p.x = Math.random() * w; }
         if (p.y > h + 20) { p.y = -20; p.x = Math.random() * w; }
 
-        // Remove dead particles
-        if (p.life >= p.maxLife) {
-          particles.splice(i, 1);
-          continue;
-        }
+        if (p.life >= p.maxLife) { particles.splice(i, 1); continue; }
 
-        // Draw
         if (p.opacity > 0.01) {
           ctx!.beginPath();
           ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-
-          // Warm golden glow
           const grad = ctx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3);
-          grad.addColorStop(0, `hsla(${p.hue}, 60%, 70%, ${p.opacity})`);
-          grad.addColorStop(0.5, `hsla(${p.hue}, 50%, 60%, ${p.opacity * 0.3})`);
+          grad.addColorStop(0, `hsla(${p.hue}, 40%, 55%, ${p.opacity})`);
+          grad.addColorStop(0.5, `hsla(${p.hue}, 35%, 50%, ${p.opacity * 0.25})`);
           grad.addColorStop(1, 'transparent');
           ctx!.fillStyle = grad;
           ctx!.fill();
@@ -123,7 +110,7 @@ export default function ArchiveParticles() {
 
     resize();
     window.addEventListener('resize', resize);
-    spawn(30);
+    spawn(25);
     animId = requestAnimationFrame(draw);
 
     return () => {
