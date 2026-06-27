@@ -5,9 +5,25 @@ import { useUserData } from './hooks/useUserData';
 import Starfield from './components/Starfield';
 import CustomCursor from './components/CustomCursor';
 import SplashScreen from './components/SplashScreen';
-import TimelineRow from './components/TimelineRow';
+import UnifiedTimeline from './components/UnifiedTimeline';
 import DetailOverlay from './components/DetailOverlay';
-import NewsPanel from './components/NewsPanel';
+import NewsCards from './components/NewsCards';
+
+/** Collect all displayable nodes from a subtree, tagged with region name */
+function collectNodes(node: typeof historyTree.children[0], regionName: string): { node: typeof node; regionName: string }[] {
+  const results: { node: typeof node; regionName: string }[] = [];
+  // Include the node itself if it has content or children
+  if (node.content || (node.children && node.children.length > 0)) {
+    results.push({ node, regionName });
+  }
+  // Recurse into children
+  if (node.children) {
+    for (const child of node.children) {
+      results.push(...collectNodes(child, regionName));
+    }
+  }
+  return results;
+}
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -15,10 +31,8 @@ export default function App() {
 
   const { query, setQuery, clearSearch } = useSearch(historyTree);
 
-  // Pre-load user data hook for future use (notes, favorites)
   useUserData();
 
-  // Gather highlighted IDs from search
   const highlightedIds = useMemo(() => {
     const ids = new Set<string>();
     if (!query.trim()) return ids;
@@ -37,8 +51,21 @@ export default function App() {
     return ids;
   }, [query]);
 
+  // Build unified timeline nodes from all sections
+  const allTimelineNodes = useMemo(() => {
+    const sections = historyTree.children || [];
+    const result: { node: typeof sections[0]; regionName: string }[] = [];
+    for (const section of sections) {
+      if (section.children) {
+        for (const child of section.children) {
+          result.push(...collectNodes(child, section.name));
+        }
+      }
+    }
+    return result;
+  }, []);
+
   const selectedNode = selectedId ? findNodeById(historyTree, selectedId) : undefined;
-  const sections = historyTree.children || [];
 
   const handleSelect = useCallback((id: string) => {
     setSelectedId(id);
@@ -56,7 +83,7 @@ export default function App() {
       {/* Main layout */}
       <div className="relative z-10 h-full flex flex-col">
         {/* Top bar */}
-        <header className="flex-shrink-0 px-8 py-5 flex items-center justify-between">
+        <header className="flex-shrink-0 px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-sm font-medium tracking-[0.2em] text-white/60">历史资料库</h1>
             <span className="text-white/10">·</span>
@@ -91,25 +118,25 @@ export default function App() {
           </div>
         </header>
 
-        {/* Timeline area */}
-        <main className="flex-1 overflow-y-auto content-scroll px-8 pb-12">
-          <div className="max-w-6xl mx-auto pt-4">
-            {sections.map((section) => (
-              <TimelineRow
-                key={section.id}
-                section={section}
-                selectedId={selectedId}
-                highlightedIds={highlightedIds}
-                onSelect={handleSelect}
-              />
-            ))}
-          </div>
-        </main>
+        {/* News cards section — top */}
+        <section className="flex-shrink-0 h-[28vh] min-h-[180px]">
+          <NewsCards />
+        </section>
 
-        {/* Hint */}
-        <div className="flex-shrink-0 pb-4 text-center">
+        {/* Unified timeline — bottom */}
+        <section className="flex-1 min-h-0">
+          <UnifiedTimeline
+            nodes={allTimelineNodes}
+            selectedId={selectedId}
+            highlightedIds={highlightedIds}
+            onSelect={handleSelect}
+          />
+        </section>
+
+        {/* Footer hint */}
+        <div className="flex-shrink-0 pb-3 text-center">
           <p className="text-[10px] tracking-widest text-white/15">
-            {query ? `${highlightedIds.size} 个搜索结果` : '点击卡片探索文明历史'}
+            {query ? `${highlightedIds.size} 个搜索结果` : '滚轮缩放 · 拖拽平移 · 点击卡片探索文明历史'}
           </p>
         </div>
       </div>
@@ -122,9 +149,6 @@ export default function App() {
           onNavigate={handleSelect}
         />
       )}
-
-      {/* News panel */}
-      <NewsPanel />
     </div>
   );
 }

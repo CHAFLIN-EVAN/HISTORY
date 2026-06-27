@@ -5,6 +5,7 @@ interface Props {
   isSelected: boolean;
   isHighlighted: boolean;
   onClick: () => void;
+  regionName?: string;
 }
 
 export default function TimelineCard({ node, isSelected, isHighlighted, onClick }: Props) {
@@ -36,6 +37,11 @@ export default function TimelineCard({ node, isSelected, isHighlighted, onClick 
         <span className="text-[10px] tracking-widest text-white/50 uppercase mb-2 block">
           {node.period}
         </span>
+      )}
+
+      {/* Region badge */}
+      {regionName && (
+        <span className="text-[9px] text-white/25 mb-0.5 block">{regionName}</span>
       )}
 
       {/* Name */}
