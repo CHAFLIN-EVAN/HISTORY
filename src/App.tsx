@@ -122,7 +122,7 @@ export default function App() {
         </header>
 
         {/* News cards section — top */}
-        <section className="flex-shrink-0 h-[20vh] min-h-[140px] relative z-[15]">
+        <section className="flex-shrink-0 h-[20vh] min-h-[140px] relative z-[15] bg-black/95">
           <NewsCards />
         </section>
 

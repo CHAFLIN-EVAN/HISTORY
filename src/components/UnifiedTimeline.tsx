@@ -95,8 +95,8 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
       }
       (item as any)._level = level;
       const side = level % 2 === 0 ? 'above' : 'below';
-      const rawOffset = Math.floor(level / 2) * (CARD_H + CONNECTOR_H + 12);
-      const offset = Math.min(rawOffset, 240); // Cap to avoid clipping
+      const rawOffset = Math.floor(level / 2) * 100;
+      const offset = Math.min(rawOffset, 160); // Cap to prevent overlap with news section
       return { ...item, x, side, offset, totalWidth: totalW };
     });
   }, [sorted, scale]);
@@ -171,7 +171,7 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
       <div
         ref={containerRef}
         className={`flex-1 select-none ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-        style={{ overflow: 'clip', overflowClipMargin: '450px' }}
+        style={{ overflow: 'clip', overflowClipMargin: '200px' }}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
