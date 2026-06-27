@@ -1,7 +1,11 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import type { DynastyNode } from '../types';
 import { parsePeriodStart } from '../utils/period';
 import TimelineCard from './TimelineCard';
+
+gsap.registerPlugin(useGSAP);
 
 interface Props {
   nodes: { node: DynastyNode; regionName: string }[];
@@ -98,6 +102,14 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
 
   const totalWidth = layout.length > 0 ? layout[0].totalWidth : 10000;
 
+  // Stagger card entrance
+  useGSAP(() => {
+    gsap.fromTo('.timeline-card-wrap',
+      { autoAlpha: 0, y: 20, scale: 0.95 },
+      { autoAlpha: 1, y: 0, scale: 1, duration: 0.5, stagger: { each: 0.02, from: 'start' }, ease: 'power2.out' }
+    );
+  }, { dependencies: [sorted.length] });
+
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
     setScale((s) => {
@@ -182,8 +194,8 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
             return (
               <div
                 key={node.id}
-                className="absolute"
-                style={{
+                className="timeline-card-wrap absolute"
+                style={{ visibility: 'hidden',
                   left: x - CARD_W / 2,
                   width: CARD_W,
                   height: CARD_H,

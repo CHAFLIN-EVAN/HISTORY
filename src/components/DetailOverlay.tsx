@@ -1,7 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import type { DynastyNode } from '../types';
 import TimelineView from './TimelineView';
 import RelationGraph from './RelationGraph';
+
+gsap.registerPlugin(useGSAP);
 
 interface Props {
   node: DynastyNode;
@@ -11,11 +15,28 @@ interface Props {
 
 export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
   const [tab, setTab] = useState<'overview' | 'timeline' | 'figures' | 'culture'>('overview');
-  const [visible, setVisible] = useState(false);
+  const backdropRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const exitingRef = useRef(false);
 
-  useEffect(() => {
-    setTab('overview');
-    requestAnimationFrame(() => setVisible(true));
+  // Entrance animation
+  useGSAP(() => {
+    if (exitingRef.current) return;
+
+    const tl = gsap.timeline();
+
+    tl.fromTo(backdropRef.current,
+      { autoAlpha: 0 },
+      { autoAlpha: 1, duration: 0.3, ease: 'power2.out' }
+    );
+
+    tl.fromTo(panelRef.current,
+      { autoAlpha: 0, scale: 0.95, y: 20 },
+      { autoAlpha: 1, scale: 1, y: 0, duration: 0.35, ease: 'power3.out' },
+      '<0.05'
+    );
+
+    // Escape key
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') handleClose();
     }
@@ -24,8 +45,20 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
   }, [node.id]);
 
   function handleClose() {
-    setVisible(false);
-    setTimeout(onClose, 350);
+    exitingRef.current = true;
+
+    const tl = gsap.timeline({
+      onComplete: () => onClose(),
+    });
+
+    tl.to(panelRef.current,
+      { autoAlpha: 0, scale: 0.95, y: 10, duration: 0.25, ease: 'power2.in' }
+    );
+
+    tl.to(backdropRef.current,
+      { autoAlpha: 0, duration: 0.2, ease: 'power2.in' },
+      '<0.05'
+    );
   }
 
   const c = node.content;
@@ -39,21 +72,22 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300 ${
-          visible ? 'opacity-100' : 'opacity-0'
-        }`}
+        ref={backdropRef}
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+        style={{ visibility: 'hidden' }}
         onClick={handleClose}
       />
 
-      {/* Centered glass panel */}
+      {/* Panel */}
       <div
-        className={`fixed z-50 transition-all duration-300
+        ref={panelRef}
+        className="fixed z-50 transition-colors
           inset-8 sm:inset-12 md:inset-16 lg:inset-x-24 lg:inset-y-16
           rounded-3xl border border-white/[0.10]
           bg-zinc-900/75 backdrop-blur-2xl
           shadow-2xl shadow-black/40
-          flex flex-col overflow-hidden
-          ${visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+          flex flex-col overflow-hidden"
+        style={{ visibility: 'hidden' }}
       >
         {/* Header bar */}
         <div className="flex-shrink-0 flex items-center justify-between px-8 py-5 border-b border-white/[0.06]">
@@ -78,7 +112,6 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
         {/* Body */}
         <div className="flex-1 overflow-y-auto content-scroll">
           <div className="px-8 py-6">
-            {/* Sub-children chips */}
             {children.length > 0 && (
               <div className="flex gap-2 flex-wrap mb-6">
                 {children.map((ch) => (
@@ -95,7 +128,6 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
               </div>
             )}
 
-            {/* Tabs */}
             {hasContent && (
               <>
                 <div className="flex gap-5 mb-5 border-b border-white/[0.06]">
@@ -120,7 +152,6 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
                   })}
                 </div>
 
-                {/* Content */}
                 {tab === 'overview' && (
                   <p className="text-sm leading-relaxed text-white/65">{c.overview}</p>
                 )}

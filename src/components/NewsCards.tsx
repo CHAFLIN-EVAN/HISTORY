@@ -1,5 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { fetchNews, type NewsItem } from '../services/newsService';
+
+gsap.registerPlugin(useGSAP);
 
 const CATEGORY_CONFIG: Record<NewsItem['category'], { emoji: string; gradient: string; accent: string }> = {
   politics: { emoji: '🏛️', gradient: 'from-blue-500/20 to-blue-700/5', accent: 'bg-blue-400' },
@@ -23,6 +27,7 @@ function NewsCardSkeleton() {
 export default function NewsCards() {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,6 +41,16 @@ export default function NewsCards() {
     });
     return () => { cancelled = true; };
   }, []);
+
+  // Stagger entrance when news loads
+  useGSAP(() => {
+    if (loading || news.length === 0) return;
+
+    gsap.fromTo('.news-card',
+      { autoAlpha: 0, y: 30 },
+      { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.1, ease: 'power3.out' }
+    );
+  }, { dependencies: [loading, news.length], scope: containerRef });
 
   if (loading) {
     return (
@@ -56,7 +71,7 @@ export default function NewsCards() {
   }
 
   return (
-    <div className="flex gap-4 px-8 h-full">
+    <div ref={containerRef} className="flex gap-4 px-8 h-full">
       {news.map((item, i) => {
         const config = CATEGORY_CONFIG[item.category];
         return (
@@ -65,9 +80,9 @@ export default function NewsCards() {
             href={item.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`flex-1 min-w-0 rounded-2xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] overflow-hidden transition-all duration-300 group flex flex-col`}
+            className="news-card flex-1 min-w-0 rounded-2xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] overflow-hidden transition-all duration-300 group flex flex-col"
+            style={{ visibility: 'hidden' }}
           >
-            {/* Thumbnail placeholder */}
             <div className={`relative h-24 bg-gradient-to-br ${config.gradient} flex items-center justify-center`}>
               <span className="text-3xl opacity-40">{config.emoji}</span>
               <span className={`absolute top-3 right-3 text-[9px] px-2 py-0.5 rounded-full ${config.accent} bg-opacity-15 text-white/50`}>
@@ -75,7 +90,6 @@ export default function NewsCards() {
               </span>
             </div>
 
-            {/* Content */}
             <div className="p-4 flex flex-col flex-1">
               <h3 className="text-sm text-white/80 group-hover:text-white leading-relaxed line-clamp-2 mb-3 transition-colors">
                 {item.title}

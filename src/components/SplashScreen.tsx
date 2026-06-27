@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
 
 interface Props {
   onComplete: () => void;
@@ -36,13 +37,14 @@ interface Particle {
 
 export default function SplashScreen({ onComplete }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const logoRef = useRef<HTMLDivElement>(null);
+  const pulseRef = useRef<HTMLDivElement>(null);
   const [stage, setStage] = useState<'build' | 'dissolve' | 'logo'>('build');
-  const [logoVisible, setLogoVisible] = useState(false);
-  const [fadeOut, setFadeOut] = useState(false);
   const particlesRef = useRef<Particle[]>([]);
   const frameRef = useRef(0);
   const stageFrameRef = useRef(0);
 
+  // Canvas particle animation
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -52,7 +54,6 @@ export default function SplashScreen({ onComplete }: Props) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Init: scatter particles across full screen
     particlesRef.current = Array.from({ length: 60 }, () => makeParticle(canvas!));
 
     let animId: number;
@@ -73,41 +74,32 @@ export default function SplashScreen({ onComplete }: Props) {
       frameRef.current++;
       const cvs = canvas!;
 
-      // Trail effect
       ctx!.fillStyle = 'rgba(0,0,0,0.06)';
       ctx!.fillRect(0, 0, cvs.width, cvs.height);
 
       const ps = particlesRef.current;
 
-      // Build phase: spawn fast
       if (stage === 'build') {
         if (frameRef.current % 2 === 0 && ps.length < 280) {
           ps.push(makeParticle(cvs));
         }
-        // After enough frames, start dissolve
         if (frameRef.current > 150) {
           setStage('dissolve');
           stageFrameRef.current = frameRef.current;
         }
       }
 
-      // Dissolve phase: fade out all
       if (stage === 'dissolve') {
         const elapsed = frameRef.current - stageFrameRef.current;
-        // After dissolve completes, show logo
         if (elapsed > 70) {
           setStage('logo');
-          setLogoVisible(true);
         }
       }
 
-      // Draw all particles
       for (const p of ps) {
-        // Fade in during build
         if (stage === 'build' && p.opacity < p.targetOpacity) {
           p.opacity += p.fadeSpeed;
         }
-        // Fade out during dissolve
         if (stage === 'dissolve') {
           p.opacity -= 0.012;
           if (p.opacity < 0) p.opacity = 0;
@@ -139,26 +131,50 @@ export default function SplashScreen({ onComplete }: Props) {
     };
   }, [stage]);
 
+  // GSAP logo entrance
+  useEffect(() => {
+    if (stage !== 'logo' || !logoRef.current || !pulseRef.current) return;
+
+    const tl = gsap.timeline();
+
+    tl.fromTo(logoRef.current,
+      { autoAlpha: 0, scale: 0.9, filter: 'blur(4px)' },
+      { autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: 1, ease: 'power2.out' }
+    );
+
+    // Pulse ring animation
+    gsap.to(pulseRef.current, {
+      scale: 1.6,
+      autoAlpha: 0,
+      duration: 2.5,
+      ease: 'power1.out',
+      repeat: -1,
+      repeatDelay: 0.3,
+    });
+  }, [stage]);
+
   function handleEnter() {
-    setFadeOut(true);
-    setTimeout(onComplete, 800);
+    const tl = gsap.timeline({
+      onComplete: () => onComplete(),
+    });
+
+    tl.to('.splash-container', {
+      autoAlpha: 0,
+      duration: 0.8,
+      ease: 'power2.inOut',
+    });
   }
 
   return (
     <div
-      className={`fixed inset-0 z-50 bg-black transition-opacity duration-[800ms] ease-out ${
-        fadeOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
-      }`}
+      className="splash-container fixed inset-0 z-50 bg-black"
+      style={{ willChange: 'opacity' }}
     >
       <canvas ref={canvasRef} className="absolute inset-0" />
 
-      {logoVisible && (
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-          <button
-            onClick={handleEnter}
-            className="group relative"
-            style={{ animation: 'logoIn 1s ease-out forwards' }}
-          >
+      {stage === 'logo' && (
+        <div ref={logoRef} className="absolute inset-0 flex items-center justify-center z-10">
+          <button onClick={handleEnter} className="group relative">
             <div className="absolute inset-0 rounded-full bg-white/[0.03] blur-3xl scale-150
                           group-hover:bg-white/[0.08] transition-all duration-700" />
 
@@ -179,24 +195,13 @@ export default function SplashScreen({ onComplete }: Props) {
             </div>
 
             <div
-              className="absolute inset-0 rounded-full border border-white/[0.03]
-                       group-hover:opacity-100 opacity-0 transition-opacity duration-500"
-              style={{ animation: 'pulseRing 2.5s ease-out infinite' }}
+              ref={pulseRef}
+              className="absolute inset-0 rounded-full border border-white/[0.03] opacity-60"
+              style={{ visibility: 'visible' }}
             />
           </button>
         </div>
       )}
-
-      <style>{`
-        @keyframes logoIn {
-          from { opacity: 0; transform: scale(0.9); filter: blur(4px); }
-          to { opacity: 1; transform: scale(1); filter: blur(0); }
-        }
-        @keyframes pulseRing {
-          0% { transform: scale(1); opacity: 0.6; }
-          100% { transform: scale(1.6); opacity: 0; }
-        }
-      `}</style>
     </div>
   );
 }
