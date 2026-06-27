@@ -16,13 +16,29 @@ const BASE_PX_PER_YEAR = 2;
 const CARD_W = 160;
 const CARD_H = 112;
 const CONNECTOR_H = 28;
-const PADDING_X = 260;
-const MARKER_INTERVAL = 500;
+const PADDING_X = 200;
+const MIN_CARD_GAP = 48;
 
 function formatYear(y: number): string {
   if (y < 0) return `前${-y}`;
   if (y === 0) return '公元元年';
   return `${y}`;
+}
+
+/** Compress large year gaps so empty periods don't waste space */
+function gapPx(yearGap: number, scale: number): number {
+  const raw = yearGap * BASE_PX_PER_YEAR * scale;
+  const maxGap = 320 * scale;
+  return maxGap * (raw / (raw + maxGap));
+}
+
+/** Node weight: nodes with more children get extra breathing room */
+function nodeWeight(node: DynastyNode): number {
+  const childCount = node.children?.length || 0;
+  if (childCount === 0) return 1;
+  if (childCount <= 3) return 1.2;
+  if (childCount <= 6) return 1.4;
+  return 1.6;
 }
 
 export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onSelect }: Props) {
@@ -33,7 +49,6 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
   const dragStart = useRef({ x: 0, tx: 0 });
   const hasDragged = useRef(false);
 
-  // Sort by parsed year, filter out items without parseable dates
   const sorted = useMemo(() => {
     return [...nodes]
       .map((item) => ({ ...item, year: parsePeriodStart(item.node.period) }))
@@ -41,29 +56,33 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
       .sort((a, b) => a.year - b.year);
   }, [nodes]);
 
-  const { minYear, maxYear, totalWidth } = useMemo(() => {
-    if (sorted.length === 0) return { minYear: -3000, maxYear: 2000, totalWidth: 10000 };
-    const years = sorted.map((s) => s.year);
-    const minY = Math.min(...years);
-    const maxY = Math.max(...years);
-    const px = BASE_PX_PER_YEAR * scale;
-    const w = (maxY - minY) * px + PADDING_X * 2;
-    return { minYear: minY, maxYear: maxY, totalWidth: w };
-  }, [sorted, scale]);
-
-  function xForYear(year: number): number {
-    return (year - minYear) * BASE_PX_PER_YEAR * scale + PADDING_X;
-  }
-
-  // Compute layout with stagger collision avoidance
+  // Non-linear positions — compress empty periods
   const layout = useMemo(() => {
+    // First pass: assign X positions with gap compression
+    const withPositions: { x: number }[] = [];
+    let currentX = PADDING_X;
+
+    for (let i = 0; i < sorted.length; i++) {
+      withPositions.push({ x: currentX });
+
+      if (i < sorted.length - 1) {
+        const yearGap = Math.max(0, sorted[i + 1].year - sorted[i].year);
+        const pxGap = gapPx(yearGap, scale);
+        const w = nodeWeight(sorted[i].node);
+        currentX += Math.max(MIN_CARD_GAP, pxGap) * w;
+      }
+    }
+
+    const totalW = currentX + PADDING_X;
+
+    // Second pass: stagger overlapping cards
     return sorted.map((item, i) => {
-      const x = xForYear(item.year);
+      const x = withPositions[i].x;
       let level = 0;
-      const minDist = (CARD_W + 24) / scale;
+      const minDist = (CARD_W + 20) / scale;
 
       for (let j = i - 1; j >= 0 && j >= i - 6; j--) {
-        const prevX = xForYear(sorted[j].year);
+        const prevX = withPositions[j].x;
         if (Math.abs(x - prevX) < minDist && (sorted[j] as any)._level === level) {
           level++;
         } else if (Math.abs(x - prevX) >= minDist * 2) {
@@ -73,20 +92,11 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
       (item as any)._level = level;
       const side = level % 2 === 0 ? 'above' : 'below';
       const offset = Math.floor(level / 2) * (CARD_H + CONNECTOR_H + 12);
-      return { ...item, x, side, offset };
+      return { ...item, x, side, offset, totalWidth: totalW };
     });
-  }, [sorted, scale, minYear]);
+  }, [sorted, scale]);
 
-  // Year markers
-  const markers = useMemo(() => {
-    const m: number[] = [];
-    const start = Math.floor(minYear / MARKER_INTERVAL) * MARKER_INTERVAL;
-    const end = Math.ceil(maxYear / MARKER_INTERVAL) * MARKER_INTERVAL;
-    for (let y = start; y <= end; y += MARKER_INTERVAL) {
-      m.push(y);
-    }
-    return m;
-  }, [minYear, maxYear]);
+  const totalWidth = layout.length > 0 ? layout[0].totalWidth : 10000;
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
@@ -138,7 +148,13 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
         <span className="text-[10px] text-white/25 ml-1 w-9 text-center">{Math.round(scale * 100)}%</span>
       </div>
 
-      {/* Scrollable timeline area */}
+      {/* Fixed central axis — always full width */}
+      <div
+        className="absolute left-0 right-0 z-10 pointer-events-none"
+        style={{ top: '50%', height: 1, background: 'rgba(255,255,255,0.18)' }}
+      />
+
+      {/* Scrollable layer */}
       <div
         ref={containerRef}
         className={`flex-1 overflow-hidden select-none ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
@@ -157,36 +173,11 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
             transition: dragging ? 'none' : 'transform 0.12s ease-out',
           }}
         >
-          {/* Central timeline axis */}
-          <div
-            className="absolute left-0 right-0"
-            style={{ top: '50%', height: 1, background: 'rgba(255,255,255,0.18)' }}
-          />
-
-          {/* Year markers */}
-          {markers.map((y) => {
-            const x = xForYear(y);
-            return (
-              <div
-                key={y}
-                className="absolute -translate-x-1/2"
-                style={{ left: x, top: '50%' }}
-              >
-                <div style={{ width: 1, height: 12, background: 'rgba(255,255,255,0.3)', margin: '0 auto' }} />
-                <span
-                  className="block text-center whitespace-nowrap mt-1.5"
-                  style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.05em' }}
-                >
-                  {formatYear(y)}
-                </span>
-              </div>
-            );
-          })}
-
           {/* Cards */}
-          {layout.map(({ node, regionName, x, side, offset }) => {
+          {layout.map(({ node, regionName, year, x, side, offset }) => {
             const isAbove = side === 'above';
             const topFromCenter = CONNECTOR_H + offset;
+            const axisY = '50%';
 
             return (
               <div
@@ -197,8 +188,8 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
                   width: CARD_W,
                   height: CARD_H,
                   top: isAbove
-                    ? `calc(50% - ${CARD_H}px - ${topFromCenter}px)`
-                    : `calc(50% + ${topFromCenter}px)`,
+                    ? `calc(${axisY} - ${CARD_H}px - ${topFromCenter}px)`
+                    : `calc(${axisY} + ${topFromCenter}px)`,
                 }}
               >
                 {/* Connector line */}
@@ -213,21 +204,36 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
                       : { bottom: CARD_H, height: topFromCenter }),
                   }}
                 />
-                {/* Connector dot on axis */}
+                {/* Connector dot */}
                 <div
                   style={{
                     position: 'absolute',
                     left: '50%',
-                    marginLeft: -2.5,
-                    width: 5,
-                    height: 5,
+                    marginLeft: -3,
+                    width: 6,
+                    height: 6,
                     borderRadius: '50%',
                     background: selectedId === node.id
-                      ? 'rgba(255,255,255,0.7)'
-                      : 'rgba(255,255,255,0.35)',
-                    ...(isAbove ? { top: CARD_H + topFromCenter - 2.5 } : { bottom: CARD_H + topFromCenter - 2.5 }),
+                      ? 'rgba(255,255,255,0.8)'
+                      : 'rgba(255,255,255,0.4)',
+                    ...(isAbove
+                      ? { top: CARD_H + topFromCenter - 3 }
+                      : { bottom: CARD_H + topFromCenter - 3 }),
                   }}
                 />
+
+                {/* Year label on axis — placed opposite of card */}
+                <span
+                  className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] tracking-wider"
+                  style={{
+                    color: 'rgba(255,255,255,0.35)',
+                    ...(isAbove
+                      ? { top: CARD_H + topFromCenter + 8 }
+                      : { bottom: CARD_H + topFromCenter + 8 }),
+                  }}
+                >
+                  {formatYear(year)}
+                </span>
 
                 <TimelineCard
                   node={node}
