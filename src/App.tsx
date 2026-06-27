@@ -75,7 +75,7 @@ export default function App() {
   }
 
   return (
-    <div className="h-full overflow-hidden" style={{ background: '#F7F5F0', color: '#3D3A35' }}>
+    <div className="h-full overflow-hidden" style={{ background: '#080808', color: 'rgba(255,255,255,0.85)' }}>
       <Starfield />
       <ArchiveParticles />
       <CustomCursor snapEnabled={!selectedNode} />
@@ -85,9 +85,9 @@ export default function App() {
         {/* Top bar */}
         <header className="flex-shrink-0 px-8 py-4 flex items-center justify-between relative z-20">
           <div className="flex items-center gap-3">
-            <h1 className="text-sm font-medium tracking-[0.2em]" style={{ color: '#6B6762' }}>历史资料库</h1>
-            <span style={{ color: '#D4CFC6' }}>·</span>
-            <span className="text-[10px] tracking-widest" style={{ color: '#B8B2A8' }}>HISTORY ARCHIVE</span>
+            <h1 className="text-sm font-light tracking-[0.4em] uppercase" style={{ color: 'rgba(255,255,255,0.7)' }}>历史资料库</h1>
+            <span style={{ color: 'rgba(255,255,255,0.15)' }}>·</span>
+            <span className="text-[10px] tracking-[0.3em] uppercase" style={{ color: 'rgba(255,255,255,0.25)' }}>HISTORY ARCHIVE</span>
           </div>
 
           {/* Search */}
@@ -97,29 +97,29 @@ export default function App() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="搜索朝代、人物、事件…"
-              className="w-64 h-8 pl-8 pr-3 rounded-full text-xs outline-none transition-all"
+              className="w-64 h-8 pl-8 pr-3 rounded-full text-xs outline-none transition-all duration-500"
               style={{
-                background: 'rgba(0,0,0,0.03)',
-                color: '#5C5852',
-                border: '1px solid rgba(0,0,0,0.06)',
+                background: 'rgba(255,255,255,0.03)',
+                color: 'rgba(255,255,255,0.7)',
+                border: '1px solid rgba(255,255,255,0.06)',
               }}
               onFocus={(e) => {
-                e.currentTarget.style.background = 'rgba(0,0,0,0.05)';
-                e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)';
+                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
               }}
               onBlur={(e) => {
-                e.currentTarget.style.background = 'rgba(0,0,0,0.03)';
-                e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)';
+                e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
               }}
             />
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: '#B8B2A8' }}>
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'rgba(255,255,255,0.2)' }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             {query && (
               <button
                 onClick={clearSearch}
                 className="absolute right-3 top-1/2 -translate-y-1/2"
-                style={{ color: '#C8C3B8' }}
+                style={{ color: 'rgba(255,255,255,0.25)' }}
               >
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -140,14 +140,14 @@ export default function App() {
         </section>
 
         {/* News cards section — top (DOM second, always paints above timeline cards) */}
-        <section className="flex-shrink-0 h-[20vh] min-h-[140px] order-1" style={{ background: '#F7F5F0' }}>
+        <section className="flex-shrink-0 h-[20vh] min-h-[140px] order-1" style={{ background: '#080808' }}>
           <NewsCards />
         </section>
 
         {/* Footer hint */}
-        <div className="flex-shrink-0 pb-3 text-center order-3" style={{ background: '#F7F5F0' }}>
-          <p className="text-[10px] tracking-widest" style={{ color: '#C8C3B8' }}>
-            {query ? `${highlightedIds.size} 个搜索结果` : '滚轮缩放 · 拖拽平移 · 点击卡片探索文明历史'}
+        <div className="flex-shrink-0 pb-3 text-center order-3" style={{ background: '#080808' }}>
+          <p className="text-[10px] tracking-[0.3em] uppercase" style={{ color: 'rgba(255,255,255,0.12)' }}>
+            {query ? `${highlightedIds.size} 个搜索结果` : 'SCROLL · DRAG · CLICK TO EXPLORE'}
           </p>
         </div>
       </div>

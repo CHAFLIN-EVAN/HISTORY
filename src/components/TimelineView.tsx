@@ -6,13 +6,13 @@ interface Props {
 }
 
 export default function TimelineView({ events, dark }: Props) {
-  const lineColor = dark ? 'bg-white/[0.08]' : 'bg-zinc-200';
-  const dotBorder = dark ? 'border-white/20' : 'border-zinc-300';
-  const dotBg = dark ? 'bg-zinc-900' : 'bg-white';
-  const cardBg = dark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-white border-zinc-200/60';
-  const cardHover = dark ? 'hover:bg-white/[0.06]' : 'hover:border-zinc-300';
-  const yearColor = dark ? 'text-white/30' : 'text-zinc-400';
-  const textColor = dark ? 'text-white/70' : 'text-zinc-700';
+  const lineColor = dark ? 'bg-white/[0.06]' : 'bg-zinc-200';
+  const dotBorder = dark ? 'border-white/[0.15]' : 'border-zinc-300';
+  const dotBg = dark ? 'bg-[#141416]' : 'bg-white';
+  const cardBg = dark ? 'bg-white/[0.02] border-white/[0.04]' : 'bg-white border-zinc-200/60';
+  const cardHover = dark ? 'hover:bg-white/[0.04]' : 'hover:border-zinc-300';
+  const yearColor = dark ? 'text-white/20' : 'text-zinc-400';
+  const textColor = dark ? 'text-white/50' : 'text-zinc-700';
 
   return (
     <div className="relative">

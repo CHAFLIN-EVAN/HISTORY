@@ -6,19 +6,19 @@ import { fetchNews, type NewsItem } from '../services/newsService';
 gsap.registerPlugin(useGSAP);
 
 const CATEGORY_CONFIG: Record<NewsItem['category'], { emoji: string; gradient: string; accent: string }> = {
-  politics: { emoji: '🏛️', gradient: 'from-blue-100 to-blue-50', accent: 'bg-blue-200' },
-  economy: { emoji: '📊', gradient: 'from-emerald-100 to-emerald-50', accent: 'bg-emerald-200' },
-  culture: { emoji: '🎭', gradient: 'from-purple-100 to-purple-50', accent: 'bg-purple-200' },
-  history: { emoji: '📜', gradient: 'from-amber-100 to-amber-50', accent: 'bg-amber-200' },
+  politics: { emoji: '🏛️', gradient: 'from-blue-950 to-blue-900/40', accent: 'bg-blue-500/20' },
+  economy: { emoji: '📊', gradient: 'from-emerald-950 to-emerald-900/40', accent: 'bg-emerald-500/20' },
+  culture: { emoji: '🎭', gradient: 'from-purple-950 to-purple-900/40', accent: 'bg-purple-500/20' },
+  history: { emoji: '📜', gradient: 'from-amber-950 to-amber-900/40', accent: 'bg-amber-500/20' },
 };
 
 function NewsCardSkeleton() {
   return (
-    <div className="flex-1 min-w-0 rounded-2xl border overflow-hidden animate-pulse" style={{ background: '#FCFBF8', borderColor: 'rgba(0,0,0,0.06)' }}>
-      <div className="h-24" style={{ background: 'rgba(0,0,0,0.02)' }} />
+    <div className="flex-1 min-w-0 rounded-2xl border overflow-hidden animate-pulse" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.04)' }}>
+      <div className="h-24" style={{ background: 'rgba(255,255,255,0.02)' }} />
       <div className="p-4 space-y-2">
-        <div className="h-3 rounded w-3/4" style={{ background: 'rgba(0,0,0,0.05)' }} />
-        <div className="h-3 rounded w-1/2" style={{ background: 'rgba(0,0,0,0.03)' }} />
+        <div className="h-3 rounded w-3/4" style={{ background: 'rgba(255,255,255,0.04)' }} />
+        <div className="h-3 rounded w-1/2" style={{ background: 'rgba(255,255,255,0.02)' }} />
       </div>
     </div>
   );
@@ -63,7 +63,7 @@ export default function NewsCards() {
   if (news.length === 0) {
     return (
       <div className="flex items-center justify-center h-full px-8">
-        <span className="text-xs tracking-wider" style={{ color: '#C8C3B8' }}>暂无新闻数据 · 请检查网络连接</span>
+        <span className="text-xs tracking-wider" style={{ color: 'rgba(255,255,255,0.12)' }}>暂无新闻数据 · 请检查网络连接</span>
       </div>
     );
   }
@@ -81,23 +81,23 @@ export default function NewsCards() {
             className="news-card flex-1 min-w-0 rounded-2xl overflow-hidden transition-all duration-300 group flex flex-col"
             style={{
               visibility: 'hidden',
-              background: '#FCFBF8',
-              border: '1px solid rgba(0,0,0,0.06)',
-              boxShadow: '0 1px 8px rgba(0,0,0,0.03)',
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.04)',
+              boxShadow: '0 1px 8px rgba(0,0,0,0.2)',
             }}
           >
             <div className={`relative h-24 bg-gradient-to-br ${config.gradient} flex items-center justify-center`}>
               <span className="text-3xl opacity-30">{config.emoji}</span>
-              <span className={`absolute top-3 right-3 text-[9px] px-2 py-0.5 rounded-full ${config.accent} bg-opacity-40`} style={{ color: '#5C5852' }}>
+              <span className={`absolute top-3 right-3 text-[9px] px-2 py-0.5 rounded-full ${config.accent}`} style={{ color: 'rgba(255,255,255,0.5)' }}>
                 {item.category === 'politics' ? '政治' : item.category === 'economy' ? '经济' : item.category === 'culture' ? '文化' : '历史'}
               </span>
             </div>
 
             <div className="p-4 flex flex-col flex-1">
-              <h3 className="text-sm leading-relaxed line-clamp-2 mb-3 transition-colors" style={{ color: '#3D3A35' }}>
+              <h3 className="text-sm leading-relaxed line-clamp-2 mb-3 transition-colors" style={{ color: 'rgba(255,255,255,0.55)' }}>
                 {item.title}
               </h3>
-              <div className="mt-auto flex items-center justify-between text-[10px]" style={{ color: '#B8B2A8' }}>
+              <div className="mt-auto flex items-center justify-between text-[10px]" style={{ color: 'rgba(255,255,255,0.15)' }}>
                 <span>{item.source}</span>
                 <span>{item.date}</span>
               </div>

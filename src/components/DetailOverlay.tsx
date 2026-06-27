@@ -72,7 +72,7 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
       <div
         ref={backdropRef}
         className="fixed inset-0 z-40"
-        style={{ visibility: 'hidden', background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}
+        style={{ visibility: 'hidden', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}
         onClick={handleClose}
       />
 
@@ -86,18 +86,18 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
           flex flex-col overflow-hidden"
         style={{
           visibility: 'hidden',
-          background: 'rgba(255,255,255,0.92)',
-          backdropFilter: 'blur(20px)',
-          borderColor: 'rgba(0,0,0,0.08)',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.12)',
+          background: 'rgba(20,20,22,0.94)',
+          backdropFilter: 'blur(24px)',
+          borderColor: 'rgba(255,255,255,0.06)',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
         }}
       >
         {/* Header bar */}
-        <div className="flex-shrink-0 flex items-center justify-between px-8 py-5 border-b" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
+        <div className="flex-shrink-0 flex items-center justify-between px-8 py-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
           <div className="flex items-center gap-3 min-w-0">
-            <h2 className="text-base font-semibold tracking-wide truncate" style={{ color: '#3D3A35' }}>{node.name}</h2>
+            <h2 className="text-base font-light tracking-[0.15em] truncate" style={{ color: 'rgba(255,255,255,0.8)' }}>{node.name}</h2>
             {node.period && (
-              <span className="text-[11px] tracking-wider px-2.5 py-0.5 rounded-full flex-shrink-0" style={{ color: '#8A8680', background: 'rgba(0,0,0,0.04)' }}>
+              <span className="text-[11px] tracking-[0.1em] px-2.5 py-0.5 rounded-full flex-shrink-0" style={{ color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.04)' }}>
                 {node.period}
               </span>
             )}
@@ -105,7 +105,7 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
           <button
             onClick={handleClose}
             className="flex-shrink-0 p-2 transition-colors rounded-lg"
-            style={{ color: '#B8B2A8' }}
+            style={{ color: 'rgba(255,255,255,0.25)' }}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
@@ -124,7 +124,7 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
                     data-snap
                     onClick={() => onNavigate(ch.id)}
                     className="px-3 py-1.5 rounded-lg text-xs transition-all"
-                    style={{ color: '#5C5852', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)' }}
+                    style={{ color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
                   >
                     {ch.name}
                   </button>
@@ -134,7 +134,7 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
 
             {hasContent && (
               <>
-                <div className="flex gap-5 mb-5 border-b" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
+                <div className="flex gap-5 mb-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
                   {(['overview', 'timeline', 'figures', 'culture'] as const).map((t) => {
                     const labels = { overview: '概述', timeline: '时间线', figures: '人物', culture: '文化' };
                     const empty = (t === 'timeline' && !hasTimeline) ||
@@ -148,11 +148,11 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
                         className={`pb-2.5 text-xs transition-colors relative ${
                           tab === t ? 'font-medium' : ''
                         }`}
-                        style={{ color: tab === t ? '#3D3A35' : '#B8B2A8' }}
+                        style={{ color: tab === t ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.2)' }}
                       >
                         {labels[t]}
                         {tab === t && (
-                          <span className="absolute bottom-0 left-0 right-0" style={{ height: 1, background: 'rgba(0,0,0,0.2)' }} />
+                          <span className="absolute bottom-0 left-0 right-0" style={{ height: 1, background: 'rgba(255,255,255,0.15)' }} />
                         )}
                       </button>
                     );
@@ -160,16 +160,16 @@ export default function DetailOverlay({ node, onClose, onNavigate }: Props) {
                 </div>
 
                 {tab === 'overview' && (
-                  <p className="text-sm leading-relaxed" style={{ color: '#6B6762' }}>{c.overview}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{c.overview}</p>
                 )}
                 {tab === 'timeline' && hasTimeline && (
-                  <TimelineView events={c.timeline} dark={false} />
+                  <TimelineView events={c.timeline} dark={true} />
                 )}
                 {tab === 'figures' && hasFigures && (
                   <RelationGraph figures={c.figures} />
                 )}
                 {tab === 'culture' && hasCulture && (
-                  <p className="text-sm leading-relaxed" style={{ color: '#6B6762' }}>{c.culture}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{c.culture}</p>
                 )}
               </>
             )}

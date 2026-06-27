@@ -60,7 +60,7 @@ export default function Starfield() {
         pools.push({
           cx: Math.random() * w,
           cy: Math.random() * h,
-          radius: 100 + Math.random() * 180,
+          radius: 140 + Math.random() * 240,
           driftVx: (Math.random() - 0.5) * 0.12,
           driftVy: (Math.random() - 0.5) * 0.1,
         });
@@ -109,7 +109,7 @@ export default function Starfield() {
             frequency: 0.2 + Math.random() * 0.8,
             phase: Math.random() * Math.PI * 2,
             r: 0.3 + Math.random() * 0.9 * poolFactor,
-            opacity: 0.06 + Math.random() * 0.2 + influence * 0.18,
+            opacity: 0.04 + Math.random() * 0.14 + influence * 0.14,
             poolId,
           });
 
@@ -176,8 +176,8 @@ export default function Starfield() {
       const cx = w / 2;
       const cy = h / 2;
 
-      // Semi-transparent clear for subtle trail on light bg
-      ctx!.fillStyle = 'rgba(247,245,240,0.25)';
+      // Semi-transparent clear for ghostly trail on dark bg
+      ctx!.fillStyle = 'rgba(8,8,8,0.22)';
       ctx!.fillRect(0, 0, w, h);
 
       for (const d of dots) {
@@ -220,13 +220,13 @@ export default function Starfield() {
 
         const alpha = Math.min(0.7, d.opacity + mouseBoost * 0.5);
 
-        // Ink wash glow
+        // Atmospheric glow — cool blue/white
         if (poolInfluence > 0.3 && d.r > 0.5) {
           ctx!.beginPath();
           ctx!.arc(px, py, d.r * 4, 0, Math.PI * 2);
           const washGrad = ctx!.createRadialGradient(px, py, d.r * 0.5, px, py, d.r * 4);
-          washGrad.addColorStop(0, `rgba(180,160,130,${alpha * 0.1})`);
-          washGrad.addColorStop(1, 'rgba(180,160,130,0)');
+          washGrad.addColorStop(0, `rgba(140,180,220,${alpha * 0.08})`);
+          washGrad.addColorStop(1, 'rgba(140,180,220,0)');
           ctx!.fillStyle = washGrad;
           ctx!.fill();
         }
@@ -235,15 +235,15 @@ export default function Starfield() {
         if (mouseBoost > 0.04) {
           ctx!.beginPath();
           ctx!.arc(px, py, d.r * 5, 0, Math.PI * 2);
-          ctx!.fillStyle = `rgba(140,125,100,${alpha * 0.08})`;
+          ctx!.fillStyle = `rgba(160,190,220,${alpha * 0.06})`;
           ctx!.fill();
         }
 
-        // Dot — dark on light background
+        // Dot — light on dark background
         const size = d.r * (0.5 + poolInfluence * 0.5);
         ctx!.beginPath();
         ctx!.arc(px, py, size, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(60,50,40,${alpha})`;
+        ctx!.fillStyle = `rgba(200,210,225,${alpha})`;
         ctx!.fill();
       }
 
@@ -264,8 +264,8 @@ export default function Starfield() {
         const ty = s.y - Math.sin(angle) * trailLen;
 
         const grad = ctx!.createLinearGradient(s.x, s.y, tx, ty);
-        grad.addColorStop(0, `rgba(80,65,50,${s.opacity * fade})`);
-        grad.addColorStop(1, 'rgba(80,65,50,0)');
+        grad.addColorStop(0, `rgba(180,200,230,${s.opacity * fade})`);
+        grad.addColorStop(1, 'rgba(180,200,230,0)');
         ctx!.beginPath();
         ctx!.moveTo(s.x, s.y);
         ctx!.lineTo(tx, ty);
@@ -275,7 +275,7 @@ export default function Starfield() {
 
         ctx!.beginPath();
         ctx!.arc(s.x, s.y, 1.5, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(80,65,50,${s.opacity * fade * 1.5})`;
+        ctx!.fillStyle = `rgba(200,215,240,${s.opacity * fade * 1.5})`;
         ctx!.fill();
       }
 

@@ -149,24 +149,24 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
         <button
           onClick={() => setScale((s) => Math.min(MAX_SCALE, s + 0.15))}
           className="w-6 h-6 flex items-center justify-center rounded-full text-xs transition-colors"
-          style={{ background: 'rgba(0,0,0,0.04)', color: '#8A8680' }}
+          style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.35)' }}
         >
           +
         </button>
         <button
           onClick={() => setScale((s) => Math.max(MIN_SCALE, s - 0.15))}
           className="w-6 h-6 flex items-center justify-center rounded-full text-xs transition-colors"
-          style={{ background: 'rgba(0,0,0,0.04)', color: '#8A8680' }}
+          style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.35)' }}
         >
           −
         </button>
-        <span className="text-[10px] ml-1 w-9 text-center" style={{ color: '#C8C3B8' }}>{Math.round(scale * 100)}%</span>
+        <span className="text-[10px] ml-1 w-9 text-center" style={{ color: 'rgba(255,255,255,0.15)' }}>{Math.round(scale * 100)}%</span>
       </div>
 
       {/* Fixed central axis */}
       <div
         className="absolute left-0 right-0 z-10 pointer-events-none"
-        style={{ top: '50%', height: 1, background: 'rgba(0,0,0,0.08)' }}
+        style={{ top: '50%', height: 1, background: 'rgba(255,255,255,0.05)' }}
       />
 
       {/* Scrollable layer — overflow:clip with margin prevents card clipping */}
@@ -213,7 +213,7 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
                     position: 'absolute',
                     left: '50%',
                     width: 1,
-                    background: 'rgba(0,0,0,0.08)',
+                    background: 'rgba(255,255,255,0.05)',
                     ...(isAbove
                       ? { top: CARD_H, height: topFromCenter }
                       : { bottom: CARD_H, height: topFromCenter }),
@@ -229,8 +229,8 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
                     height: 6,
                     borderRadius: '50%',
                     background: selectedId === node.id
-                      ? 'rgba(0,0,0,0.5)'
-                      : 'rgba(0,0,0,0.2)',
+                      ? 'rgba(255,255,255,0.4)'
+                      : 'rgba(255,255,255,0.1)',
                     ...(isAbove
                       ? { top: CARD_H + topFromCenter - 3 }
                       : { bottom: CARD_H + topFromCenter - 3 }),
@@ -241,7 +241,7 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
                 <span
                   className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] tracking-wider"
                   style={{
-                    color: '#C8C3B8',
+                    color: 'rgba(255,255,255,0.12)',
                     ...(isAbove
                       ? { top: CARD_H + topFromCenter + 8 }
                       : { bottom: CARD_H + topFromCenter + 8 }),

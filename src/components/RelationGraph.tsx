@@ -235,9 +235,9 @@ export default function RelationGraph({ figures }: Props) {
       const padY = 2 * dpr;
       ctx!.beginPath();
       ctx!.roundRect(px - padX, py - padY, tw + padX * 2, th + padY * 2, 6 * dpr);
-      ctx!.fillStyle = active ? 'rgba(0,0,0,0.08)' : 'rgba(0,0,0,0.03)';
+      ctx!.fillStyle = active ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)';
       ctx!.fill();
-      ctx!.fillStyle = active ? 'rgba(0,0,0,0.55)' : 'rgba(0,0,0,0.2)';
+      ctx!.fillStyle = active ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.15)';
       ctx!.textAlign = 'left';
       ctx!.textBaseline = 'top';
       ctx!.fillText(text, px, py);
@@ -332,7 +332,7 @@ export default function RelationGraph({ figures }: Props) {
         ctx!.beginPath();
         ctx!.moveTo(ax, ay);
         ctx!.lineTo(bx, by);
-        ctx!.strokeStyle = isActive ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.05)';
+        ctx!.strokeStyle = isActive ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.03)';
         ctx!.lineWidth = isActive ? (isConnected ? 2 : 1) : 0.5;
         ctx!.stroke();
 
@@ -360,45 +360,45 @@ export default function RelationGraph({ figures }: Props) {
           ctx!.fillStyle = glow; ctx!.fill();
         } else if (isConnectedToSelected) {
           const glow = ctx!.createRadialGradient(nx, ny, r * 0.5, nx, ny, r * 2.2);
-          glow.addColorStop(0, 'rgba(0,0,0,0.08)');
-          glow.addColorStop(1, 'rgba(0,0,0,0)');
+          glow.addColorStop(0, 'rgba(255,255,255,0.06)');
+          glow.addColorStop(1, 'rgba(255,255,255,0)');
           ctx!.beginPath(); ctx!.arc(nx, ny, r * 2.2, 0, Math.PI * 2);
           ctx!.fillStyle = glow; ctx!.fill();
         } else if (isHovered) {
           const glow = ctx!.createRadialGradient(nx, ny, r * 0.3, nx, ny, r * 2.2);
-          glow.addColorStop(0, 'rgba(0,0,0,0.06)');
-          glow.addColorStop(1, 'rgba(0,0,0,0)');
+          glow.addColorStop(0, 'rgba(255,255,255,0.04)');
+          glow.addColorStop(1, 'rgba(255,255,255,0)');
           ctx!.beginPath(); ctx!.arc(nx, ny, r * 2.2, 0, Math.PI * 2);
           ctx!.fillStyle = glow; ctx!.fill();
         }
 
         ctx!.beginPath(); ctx!.arc(nx, ny, r, 0, Math.PI * 2);
         ctx!.fillStyle = isSelected ? 'rgba(184,148,78,0.2)'
-          : isConnectedToSelected ? 'rgba(0,0,0,0.06)'
-          : isHovered ? 'rgba(0,0,0,0.06)'
-          : 'rgba(0,0,0,0.03)';
+          : isConnectedToSelected ? 'rgba(255,255,255,0.05)'
+          : isHovered ? 'rgba(255,255,255,0.05)'
+          : 'rgba(255,255,255,0.02)';
         ctx!.fill();
 
         ctx!.strokeStyle = isSelected ? 'rgba(184,148,78,0.6)'
-          : isConnectedToSelected ? 'rgba(0,0,0,0.25)'
-          : isHovered ? 'rgba(0,0,0,0.3)'
-          : 'rgba(0,0,0,0.1)';
+          : isConnectedToSelected ? 'rgba(255,255,255,0.2)'
+          : isHovered ? 'rgba(255,255,255,0.25)'
+          : 'rgba(255,255,255,0.08)';
         ctx!.lineWidth = isSelected ? 2 : isConnectedToSelected ? 1.2 : isHovered ? 1 : 0.5;
         ctx!.stroke();
 
         const fontSize = isSelected ? 11 : isHovered || isConnectedToSelected ? 10 : 9;
         ctx!.font = `${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
         ctx!.fillStyle = isSelected ? 'rgba(184,148,78,0.9)'
-          : isConnectedToSelected ? 'rgba(0,0,0,0.7)'
-          : isHovered ? 'rgba(0,0,0,0.75)'
-          : 'rgba(0,0,0,0.5)';
+          : isConnectedToSelected ? 'rgba(255,255,255,0.6)'
+          : isHovered ? 'rgba(255,255,255,0.65)'
+          : 'rgba(255,255,255,0.4)';
         ctx!.textAlign = 'center';
         ctx!.textBaseline = 'middle';
         ctx!.fillText(n.figure.name, nx, ny);
 
         if (isHovered || isSelected || isConnectedToSelected) {
           ctx!.font = `${isSelected ? 9 : 8}px "PingFang SC", "Microsoft YaHei", sans-serif`;
-          ctx!.fillStyle = isSelected ? 'rgba(184,148,78,0.5)' : 'rgba(0,0,0,0.3)';
+          ctx!.fillStyle = isSelected ? 'rgba(184,148,78,0.5)' : 'rgba(255,255,255,0.25)';
           ctx!.fillText(n.figure.title, nx, ny + r + 10);
         }
       }
@@ -416,14 +416,14 @@ export default function RelationGraph({ figures }: Props) {
       <div
         ref={containerRef}
         className="w-full h-[380px] rounded-xl border overflow-hidden relative"
-        style={{ background: '#FCFBF8', borderColor: 'rgba(0,0,0,0.06)' }}
+        style={{ background: 'rgba(255,255,255,0.015)', borderColor: 'rgba(255,255,255,0.04)' }}
       >
         <canvas ref={canvasRef} className="w-full h-full block" />
         {selectedIdx !== null && (
           <button
             onClick={() => selectFigure(null)}
             className="absolute top-2 right-2 text-[10px] px-2 py-0.5 rounded-full transition-colors"
-            style={{ color: '#8A8680', background: 'rgba(0,0,0,0.03)' }}
+            style={{ color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.03)' }}
           >
             取消选中
           </button>
@@ -431,22 +431,22 @@ export default function RelationGraph({ figures }: Props) {
       </div>
 
       {panelFigure && (
-        <div className="mt-4 p-5 rounded-xl border backdrop-blur-sm" style={{ background: '#FCFBF8', borderColor: 'rgba(184,148,78,0.25)' }}>
+        <div className="mt-4 p-5 rounded-xl border backdrop-blur-sm" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(184,148,78,0.15)' }}>
           <div className="flex items-center gap-3 mb-3">
             <div className="w-2 h-2 rounded-full" style={{ background: 'rgba(184,148,78,0.5)' }} />
-            <h4 className="text-sm font-medium" style={{ color: '#8B6F3E' }}>{panelFigure.name}</h4>
-            <span className="text-[10px] px-2 py-0.5 rounded-full border" style={{ color: '#8B6F3E', background: 'rgba(184,148,78,0.06)', borderColor: 'rgba(184,148,78,0.12)' }}>
+            <h4 className="text-sm font-light tracking-wide" style={{ color: 'rgba(184,148,78,0.8)' }}>{panelFigure.name}</h4>
+            <span className="text-[10px] px-2 py-0.5 rounded-full border" style={{ color: 'rgba(184,148,78,0.5)', background: 'rgba(184,148,78,0.05)', borderColor: 'rgba(184,148,78,0.08)' }}>
               {panelFigure.title}
             </span>
           </div>
-          <p className="text-xs leading-relaxed" style={{ color: '#6B6762' }}>{panelFigure.description}</p>
+          <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>{panelFigure.description}</p>
 
           {selectedIdx !== null && (() => {
             const relatedEdges = edgesRef.current.filter(e => e.from === selectedIdx || e.to === selectedIdx);
             if (relatedEdges.length === 0) return null;
             return (
-              <div className="mt-3 pt-3 border-t" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                <span className="text-[10px]" style={{ color: '#B8B2A8' }}>关联人物：</span>
+              <div className="mt-3 pt-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+                <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.2)' }}>关联人物：</span>
                 <div className="flex gap-1.5 flex-wrap mt-1.5">
                   {relatedEdges.map((e, i) => {
                     const otherIdx = e.from === selectedIdx ? e.to : e.from;
@@ -457,10 +457,10 @@ export default function RelationGraph({ figures }: Props) {
                         key={i}
                         onClick={() => selectFigure(otherIdx)}
                         className="text-[10px] px-2 py-1 rounded-md transition-all"
-                        style={{ color: '#5C5852', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)' }}
+                        style={{ color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
                       >
                         {other.figure.name}
-                        {e.label && <span style={{ color: '#C8C3B8' }} className="ml-1">· {e.label}</span>}
+                        {e.label && <span style={{ color: 'rgba(255,255,255,0.2)' }} className="ml-1">· {e.label}</span>}
                       </button>
                     );
                   })}

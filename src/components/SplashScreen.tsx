@@ -80,7 +80,7 @@ export default function SplashScreen({ onComplete }: Props) {
       frameRef.current++;
       const cvs = canvas!;
 
-      ctx!.fillStyle = 'rgba(247,245,240,0.08)';
+      ctx!.fillStyle = 'rgba(8,8,8,0.08)';
       ctx!.fillRect(0, 0, cvs.width, cvs.height);
 
       const ps = particlesRef.current;
@@ -113,7 +113,7 @@ export default function SplashScreen({ onComplete }: Props) {
         if (p.opacity <= 0.005) continue;
 
         ctx!.font = `${p.size}px "PingFang SC", "Microsoft YaHei", "SimSun", serif`;
-        ctx!.fillStyle = `rgba(60,50,40,${p.opacity})`;
+        ctx!.fillStyle = `rgba(200,195,185,${p.opacity})`;
         ctx!.textAlign = 'center';
         ctx!.textBaseline = 'middle';
         ctx!.fillText(p.text, p.x, p.y);
@@ -174,12 +174,12 @@ export default function SplashScreen({ onComplete }: Props) {
     const textEl = textRef.current;
 
     function onEnter() {
-      gsap.to(ringEl, { borderColor: 'rgba(60,50,40,0.2)', boxShadow: '0 0 120px rgba(60,50,40,0.06)', duration: 0.7 });
-      gsap.to(textEl, { color: 'rgba(60,50,40,0.8)', duration: 0.5 });
+      gsap.to(ringEl, { borderColor: 'rgba(255,255,255,0.15)', boxShadow: '0 0 120px rgba(255,255,255,0.04)', duration: 0.7 });
+      gsap.to(textEl, { color: 'rgba(255,255,255,0.75)', duration: 0.5 });
     }
     function onLeave() {
-      gsap.to(ringEl, { borderColor: 'rgba(60,50,40,0.08)', boxShadow: '0 0 0px rgba(60,50,40,0)', duration: 0.7 });
-      gsap.to(textEl, { color: 'rgba(60,50,40,0.55)', duration: 0.5 });
+      gsap.to(ringEl, { borderColor: 'rgba(255,255,255,0.06)', boxShadow: '0 0 0px rgba(255,255,255,0)', duration: 0.7 });
+      gsap.to(textEl, { color: 'rgba(255,255,255,0.5)', duration: 0.5 });
     }
 
     const btn = ringEl.closest('button');
@@ -202,24 +202,24 @@ export default function SplashScreen({ onComplete }: Props) {
   }
 
   return (
-    <div ref={containerRef} className="fixed inset-0 z-50" style={{ background: '#F7F5F0' }}>
+    <div ref={containerRef} className="fixed inset-0 z-50" style={{ background: '#080808' }}>
       <canvas ref={canvasRef} className="absolute inset-0" />
 
       {stage === 'logo' && (
         <div ref={logoRef} className="absolute inset-0 flex items-center justify-center z-10">
           <button onClick={handleEnter} className="group relative">
-            <div className="absolute inset-0 rounded-full blur-3xl scale-150" style={{ background: 'rgba(60,50,40,0.02)' }} />
+            <div className="absolute inset-0 rounded-full blur-3xl scale-150" style={{ background: 'rgba(255,255,255,0.015)' }} />
 
             <div
               ref={ringRef}
               className="relative w-44 h-44 rounded-full border flex items-center justify-center"
-              style={{ borderColor: 'rgba(60,50,40,0.08)' }}
+              style={{ borderColor: 'rgba(255,255,255,0.06)' }}
             >
-              <div ref={textRef} className="text-center" style={{ color: 'rgba(60,50,40,0.55)' }}>
+              <div ref={textRef} className="text-center" style={{ color: 'rgba(255,255,255,0.5)' }}>
                 <div className="text-base tracking-[0.5em] font-light">
                   历史资料库
                 </div>
-                <div className="mt-2 text-sm tracking-[0.3em]" style={{ color: 'rgba(60,50,40,0.2)' }}>
+                <div className="mt-2 text-sm tracking-[0.3em]" style={{ color: 'rgba(255,255,255,0.15)' }}>
                   进 入
                 </div>
               </div>
@@ -228,7 +228,7 @@ export default function SplashScreen({ onComplete }: Props) {
             <div
               ref={pulseRef}
               className="absolute inset-0 rounded-full border pointer-events-none"
-              style={{ borderColor: 'rgba(60,50,40,0.03)' }}
+              style={{ borderColor: 'rgba(255,255,255,0.02)' }}
             />
           </button>
         </div>

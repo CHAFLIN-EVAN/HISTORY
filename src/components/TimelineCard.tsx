@@ -46,32 +46,34 @@ export default function TimelineCard({ node, isSelected, isHighlighted, onClick,
       onMouseLeave={handleLeave}
       className="block w-full h-full rounded-lg text-left transition-colors duration-300 overflow-hidden"
       style={{
-        background: isSelected ? '#FFFFFF' : '#FCFBF8',
+        background: isSelected
+          ? 'rgba(255,255,255,0.08)'
+          : 'rgba(255,255,255,0.02)',
         border: isSelected
-          ? `1.5px solid ${accentColor}`
+          ? `1px solid rgba(255,255,255,0.2)`
           : isHighlighted
-          ? '1px solid rgba(0,0,0,0.12)'
-          : '1px solid rgba(0,0,0,0.06)',
+          ? '1px solid rgba(255,255,255,0.1)'
+          : '1px solid rgba(255,255,255,0.04)',
         boxShadow: isSelected
-          ? '0 4px 24px rgba(0,0,0,0.08)'
+          ? `0 0 30px ${accentColor}20, 0 4px 20px rgba(0,0,0,0.3)`
           : hovering
-          ? '0 2px 16px rgba(0,0,0,0.06)'
-          : '0 1px 4px rgba(0,0,0,0.03)',
+          ? '0 0 20px rgba(255,255,255,0.04), 0 2px 12px rgba(0,0,0,0.2)'
+          : '0 1px 3px rgba(0,0,0,0.2)',
         transform: `perspective(600px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
         transformStyle: 'preserve-3d',
         transition: hovering ? 'none' : 'transform 0.4s ease-out, box-shadow 0.3s, border-color 0.3s',
       }}
     >
-      {/* Folder tab — colored accent bar at top */}
+      {/* Accent bar at top */}
       <div
-        className="h-[3px] w-full"
-        style={{ background: isSelected ? accentColor : 'rgba(0,0,0,0.06)' }}
+        className="h-[2px] w-full"
+        style={{ background: isSelected ? accentColor : 'rgba(255,255,255,0.04)' }}
       />
 
       <div className="flex flex-col px-3 py-2.5">
         {/* Period */}
         {node.period && (
-          <span className="text-[9px] tracking-widest uppercase leading-none mb-1" style={{ color: '#B8B2A8' }}>
+          <span className="text-[9px] tracking-[0.15em] uppercase leading-none mb-1" style={{ color: 'rgba(255,255,255,0.2)' }}>
             {node.period}
           </span>
         )}
@@ -79,15 +81,15 @@ export default function TimelineCard({ node, isSelected, isHighlighted, onClick,
         {/* Region + name */}
         <div className="flex-1 flex flex-col justify-center">
           {regionName && (
-            <span className="text-[8px] leading-none mb-0.5" style={{ color: accentColor }}>
+            <span className="text-[8px] leading-none mb-0.5" style={{ color: accentColor, opacity: 0.7 }}>
               {regionName}
             </span>
           )}
-          <h3 className="text-[11px] font-medium leading-tight truncate" style={{ color: isSelected ? '#2D2B28' : '#4A4742' }}>
+          <h3 className="text-[11px] font-light leading-tight truncate tracking-wide" style={{ color: isSelected ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.6)' }}>
             {node.name}
           </h3>
           {node.nameEn && (
-            <p className="text-[9px] leading-tight mt-0.5 truncate" style={{ color: '#B8B2A8' }}>{node.nameEn}</p>
+            <p className="text-[9px] leading-tight mt-0.5 truncate" style={{ color: 'rgba(255,255,255,0.15)' }}>{node.nameEn}</p>
           )}
         </div>
       </div>

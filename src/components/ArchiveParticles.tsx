@@ -47,7 +47,7 @@ export default function ArchiveParticles() {
           opacity: 0,
           life: 0,
           maxLife: 180 + Math.random() * 350,
-          hue: 25 + Math.random() * 20,
+          hue: 200 + Math.random() * 40,
         });
       }
     }
@@ -60,7 +60,7 @@ export default function ArchiveParticles() {
 
       ctx!.clearRect(0, 0, w, h);
 
-      if (particles.length < 45) spawn(3);
+      if (particles.length < 35) spawn(2);
 
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
@@ -81,9 +81,9 @@ export default function ArchiveParticles() {
 
         p.life++;
         if (p.life < 35) {
-          p.opacity = p.life / 35 * 0.35;
+          p.opacity = p.life / 35 * 0.22;
         } else if (p.life > p.maxLife - 35) {
-          p.opacity = (p.maxLife - p.life) / 35 * 0.35;
+          p.opacity = (p.maxLife - p.life) / 35 * 0.22;
         }
 
         if (p.x < -20) p.x = w + 20;
@@ -97,8 +97,8 @@ export default function ArchiveParticles() {
           ctx!.beginPath();
           ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2);
           const grad = ctx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3);
-          grad.addColorStop(0, `hsla(${p.hue}, 40%, 55%, ${p.opacity})`);
-          grad.addColorStop(0.5, `hsla(${p.hue}, 35%, 50%, ${p.opacity * 0.25})`);
+          grad.addColorStop(0, `hsla(${p.hue}, 30%, 70%, ${p.opacity})`);
+          grad.addColorStop(0.5, `hsla(${p.hue}, 25%, 60%, ${p.opacity * 0.2})`);
           grad.addColorStop(1, 'transparent');
           ctx!.fillStyle = grad;
           ctx!.fill();
