@@ -170,8 +170,7 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
       {/* Scrollable layer — overflow:clip with margin prevents card clipping */}
       <div
         ref={containerRef}
-        className={`flex-1 select-none ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-        style={{ overflow: 'clip', overflowClipMargin: '200px' }}
+        className={`flex-1 select-none overflow-hidden ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}

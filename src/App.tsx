@@ -121,13 +121,8 @@ export default function App() {
           </div>
         </header>
 
-        {/* News cards section — top */}
-        <section className="flex-shrink-0 h-[20vh] min-h-[140px] relative z-[15] bg-black/95">
-          <NewsCards />
-        </section>
-
-        {/* Unified timeline — bottom */}
-        <section className="flex-1 min-h-0">
+        {/* Unified timeline — bottom (DOM first, order-2 to push below) */}
+        <section className="flex-1 min-h-0 order-2">
           <UnifiedTimeline
             nodes={allTimelineNodes}
             selectedId={selectedId}
@@ -136,8 +131,13 @@ export default function App() {
           />
         </section>
 
+        {/* News cards section — top (DOM second, always paints above timeline cards) */}
+        <section className="flex-shrink-0 h-[20vh] min-h-[140px] order-1 bg-black/95">
+          <NewsCards />
+        </section>
+
         {/* Footer hint */}
-        <div className="flex-shrink-0 pb-3 text-center">
+        <div className="flex-shrink-0 pb-3 text-center order-3 bg-black/95">
           <p className="text-[10px] tracking-widest text-white/15">
             {query ? `${highlightedIds.size} 个搜索结果` : '滚轮缩放 · 拖拽平移 · 点击卡片探索文明历史'}
           </p>
