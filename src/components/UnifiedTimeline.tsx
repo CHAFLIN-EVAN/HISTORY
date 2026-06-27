@@ -12,7 +12,7 @@ interface Props {
 
 const MIN_SCALE = 0.3;
 const MAX_SCALE = 2.5;
-const BASE_PX_PER_YEAR = 3;
+const BASE_PX_PER_YEAR = 2;
 const CARD_W = 160;
 const CARD_H = 112;
 const CONNECTOR_H = 28;
@@ -27,7 +27,7 @@ function formatYear(y: number): string {
 
 export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onSelect }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
+  const [scale, setScale] = useState(0.6);
   const [translateX, setTranslateX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const dragStart = useRef({ x: 0, tx: 0 });
@@ -160,7 +160,7 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
           {/* Central timeline axis */}
           <div
             className="absolute left-0 right-0"
-            style={{ top: '50%', height: 1, background: 'rgba(255,255,255,0.1)' }}
+            style={{ top: '50%', height: 1, background: 'rgba(255,255,255,0.18)' }}
           />
 
           {/* Year markers */}
@@ -172,10 +172,10 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
                 className="absolute -translate-x-1/2"
                 style={{ left: x, top: '50%' }}
               >
-                <div style={{ width: 1, height: 10, background: 'rgba(255,255,255,0.18)', margin: '0 auto' }} />
+                <div style={{ width: 1, height: 12, background: 'rgba(255,255,255,0.3)', margin: '0 auto' }} />
                 <span
                   className="block text-center whitespace-nowrap mt-1.5"
-                  style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.05em' }}
+                  style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.05em' }}
                 >
                   {formatYear(y)}
                 </span>
@@ -207,7 +207,7 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
                     position: 'absolute',
                     left: '50%',
                     width: 1,
-                    background: 'rgba(255,255,255,0.08)',
+                    background: 'rgba(255,255,255,0.14)',
                     ...(isAbove
                       ? { top: CARD_H, height: topFromCenter }
                       : { bottom: CARD_H, height: topFromCenter }),
@@ -224,7 +224,7 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
                     borderRadius: '50%',
                     background: selectedId === node.id
                       ? 'rgba(255,255,255,0.7)'
-                      : 'rgba(255,255,255,0.2)',
+                      : 'rgba(255,255,255,0.35)',
                     ...(isAbove ? { top: CARD_H + topFromCenter - 2.5 } : { bottom: CARD_H + topFromCenter - 2.5 }),
                   }}
                 />
