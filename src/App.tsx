@@ -120,7 +120,7 @@ export default function App() {
         </header>
 
         {/* News cards section — top */}
-        <section className="flex-shrink-0 h-[28vh] min-h-[180px]">
+        <section className="flex-shrink-0 h-[20vh] min-h-[140px]">
           <NewsCards />
         </section>
 
