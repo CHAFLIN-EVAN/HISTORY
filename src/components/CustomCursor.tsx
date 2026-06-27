@@ -29,16 +29,20 @@ export default function CustomCursor({ snapEnabled = true }: Props) {
     return null;
   }, [snapEnabled]);
 
+  // Create quickTo tweens — use left/top to avoid conflicting with Tailwind translate classes
   useEffect(() => {
     const lineEl = lineRef.current!;
     const glowEl = glowRef.current!;
     const dotEl = dotRef.current!;
 
-    xTo.current = gsap.quickTo([lineEl, glowEl, dotEl], 'x', { duration: 0.15, ease: 'power2.out' });
-    yTo.current = gsap.quickTo([lineEl, glowEl, dotEl], 'y', { duration: 0.15, ease: 'power2.out' });
+    xTo.current = gsap.quickTo([lineEl, glowEl, dotEl], 'left', { duration: 0.15, ease: 'power2.out' });
+    yTo.current = gsap.quickTo([lineEl, glowEl, dotEl], 'top', { duration: 0.15, ease: 'power2.out' });
   }, []);
 
   useEffect(() => {
+    // Set initial position offscreen
+    gsap.set([lineRef.current, glowRef.current, dotRef.current], { left: -200, top: -200 });
+
     function onMove(e: MouseEvent) {
       const hit = findCardUnderCursor(e.clientX, e.clientY);
 
@@ -48,10 +52,11 @@ export default function CustomCursor({ snapEnabled = true }: Props) {
         setSnapped(true);
         setSnapRect(hit.rect);
 
+        // Frame follows with quicker snap
         if (frameRef.current) {
           if (!xToFrame.current) {
-            xToFrame.current = gsap.quickTo(frameRef.current, 'x', { duration: 0.12, ease: 'power3.out' });
-            yToFrame.current = gsap.quickTo(frameRef.current, 'y', { duration: 0.12, ease: 'power3.out' });
+            xToFrame.current = gsap.quickTo(frameRef.current, 'left', { duration: 0.1, ease: 'power3.out' });
+            yToFrame.current = gsap.quickTo(frameRef.current, 'top', { duration: 0.1, ease: 'power3.out' });
           }
           const xf = xToFrame.current;
           const yf = yToFrame.current;
@@ -68,9 +73,6 @@ export default function CustomCursor({ snapEnabled = true }: Props) {
       }
     }
 
-    // Set initial position offscreen
-    gsap.set([lineRef.current, glowRef.current, dotRef.current], { x: -200, y: -200 });
-
     window.addEventListener('mousemove', onMove, { passive: true });
     return () => window.removeEventListener('mousemove', onMove);
   }, [findCardUnderCursor]);
@@ -80,7 +82,7 @@ export default function CustomCursor({ snapEnabled = true }: Props) {
   return (
     <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 9999 }}>
       <div className={`transition-opacity duration-200 ${snapped ? 'opacity-0' : 'opacity-100'}`}>
-        {/* Crosshair lines container */}
+        {/* Crosshair lines container — positioned via left/top, inner lines extend from origin */}
         <div ref={lineRef} className="absolute" style={{ left: 0, top: 0 }}>
           <div
             className="absolute w-[0.5px] bg-white/25 -translate-x-1/2"
