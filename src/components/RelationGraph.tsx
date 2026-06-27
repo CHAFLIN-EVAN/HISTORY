@@ -247,8 +247,6 @@ export default function RelationGraph({ figures }: Props) {
       const { w, h } = sizeRef.current;
       const cx = w / 2;
       const cy = h / 2;
-      const mx = mouseRef.current.x;
-      const my = mouseRef.current.y;
       const nodes = nodesRef.current;
       const edges = edgesRef.current;
       const dpr = window.devicePixelRatio || 1;
@@ -264,14 +262,6 @@ export default function RelationGraph({ figures }: Props) {
         if (dragRef.current?.node === n) continue;
         n.vx += (cx / dpr - n.x / dpr) * 0.0004;
         n.vy += (cy / dpr - n.y / dpr) * 0.0004;
-        const dx = n.x / dpr - mx / dpr;
-        const dy = n.y / dpr - my / dpr;
-        const dist = Math.hypot(dx, dy);
-        if (dist < 100 && dist > 0) {
-          const force = (1 - dist / 100) ** 2 * 2;
-          n.vx += (dx / dist) * force;
-          n.vy += (dy / dist) * force;
-        }
         for (const other of nodes) {
           if (other === n) continue;
           const dx2 = (n.x - other.x) / dpr;
