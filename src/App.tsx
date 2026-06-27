@@ -4,6 +4,7 @@ import { historyTree, findNodeById, flattenTree } from './data';
 import { useSearch } from './hooks/useSearch';
 import { useUserData } from './hooks/useUserData';
 import Starfield from './components/Starfield';
+import ArchiveParticles from './components/ArchiveParticles';
 import CustomCursor from './components/CustomCursor';
 import SplashScreen from './components/SplashScreen';
 import UnifiedTimeline from './components/UnifiedTimeline';
@@ -79,12 +80,13 @@ export default function App() {
   return (
     <div className="h-full bg-black text-white overflow-hidden">
       <Starfield />
+      <ArchiveParticles />
       <CustomCursor snapEnabled={!selectedNode} />
 
       {/* Main layout */}
       <div className="relative z-10 h-full flex flex-col">
         {/* Top bar */}
-        <header className="flex-shrink-0 px-8 py-4 flex items-center justify-between">
+        <header className="flex-shrink-0 px-8 py-4 flex items-center justify-between relative z-20">
           <div className="flex items-center gap-3">
             <h1 className="text-sm font-medium tracking-[0.2em] text-white/60">历史资料库</h1>
             <span className="text-white/10">·</span>
@@ -120,7 +122,7 @@ export default function App() {
         </header>
 
         {/* News cards section — top */}
-        <section className="flex-shrink-0 h-[20vh] min-h-[140px]">
+        <section className="flex-shrink-0 h-[20vh] min-h-[140px] relative z-[15]">
           <NewsCards />
         </section>
 

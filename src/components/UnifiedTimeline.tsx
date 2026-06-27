@@ -95,7 +95,8 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
       }
       (item as any)._level = level;
       const side = level % 2 === 0 ? 'above' : 'below';
-      const offset = Math.floor(level / 2) * (CARD_H + CONNECTOR_H + 12);
+      const rawOffset = Math.floor(level / 2) * (CARD_H + CONNECTOR_H + 12);
+      const offset = Math.min(rawOffset, 240); // Cap to avoid clipping
       return { ...item, x, side, offset, totalWidth: totalW };
     });
   }, [sorted, scale]);
@@ -166,10 +167,11 @@ export default function UnifiedTimeline({ nodes, selectedId, highlightedIds, onS
         style={{ top: '50%', height: 1, background: 'rgba(255,255,255,0.18)' }}
       />
 
-      {/* Scrollable layer */}
+      {/* Scrollable layer — overflow:clip with margin prevents card clipping */}
       <div
         ref={containerRef}
-        className={`flex-1 overflow-hidden select-none ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        className={`flex-1 select-none ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        style={{ overflow: 'clip', overflowClipMargin: '450px' }}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
