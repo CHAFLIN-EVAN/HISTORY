@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import type { DynastyNode } from './types';
 import { historyTree, findNodeById, flattenTree } from './data';
 import { useSearch } from './hooks/useSearch';
 import { useUserData } from './hooks/useUserData';
@@ -10,7 +11,7 @@ import DetailOverlay from './components/DetailOverlay';
 import NewsCards from './components/NewsCards';
 
 /** Collect all displayable nodes from a subtree, tagged with region name */
-function collectNodes(node: typeof historyTree.children[0], regionName: string): { node: typeof node; regionName: string }[] {
+function collectNodes(node: DynastyNode, regionName: string): { node: DynastyNode; regionName: string }[] {
   const results: { node: typeof node; regionName: string }[] = [];
   // Include the node itself if it has content or children
   if (node.content || (node.children && node.children.length > 0)) {
@@ -54,7 +55,7 @@ export default function App() {
   // Build unified timeline nodes from all sections
   const allTimelineNodes = useMemo(() => {
     const sections = historyTree.children || [];
-    const result: { node: typeof sections[0]; regionName: string }[] = [];
+    const result: { node: DynastyNode; regionName: string }[] = [];
     for (const section of sections) {
       if (section.children) {
         for (const child of section.children) {

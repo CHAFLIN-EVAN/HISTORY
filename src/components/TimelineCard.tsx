@@ -8,7 +8,7 @@ interface Props {
   regionName?: string;
 }
 
-export default function TimelineCard({ node, isSelected, isHighlighted, onClick }: Props) {
+export default function TimelineCard({ node, isSelected, isHighlighted, onClick, regionName }: Props) {
   const hasChildren = !!(node.children && node.children.length > 0);
 
   return (
